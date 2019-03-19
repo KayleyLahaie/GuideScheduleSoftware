@@ -232,12 +232,16 @@ def get_ordered_priority_list(trip, role):
 
         driver_priority_matrix = get_driver_priority_matrix()
 
-        #print("guides: ",guide_priority_matrix)
-        #print('\n\n',trip,role,': ')
-
+        driver_s = {}
         drivers = {}
+        drivers_seniority = {}
         drivers_ordered_name = []
         drivers_ordered_priority = []
+        drivers_ordered_seniority = []
+
+        for driver_name in driver_priority_matrix:
+            driver_s[driver_name] = (driver_priority_matrix[driver_name][1])
+            driver_priority_matrix[driver_name] = driver_priority_matrix[driver_name][0]
 
         for key in driver_priority_matrix:
 
@@ -246,15 +250,18 @@ def get_ordered_priority_list(trip, role):
             #print("3*trip", 3*trip)
             #print("role+(3*trip)", schedule_dictionaries.guide_roles_converter[role]+(3*trip))
 
-            print("role+(trip): ", role+(2*trip))
-            print(role)
-            print(trip)
-            print(len(driver_priority_matrix[key]))
+            #print("role+(trip): ", role+(2*trip))
+            #print(role)
+            #print(trip)
+            #print(len(driver_priority_matrix[key]))
 
             drivers[key] = driver_priority_matrix[key][
                             trip]
 
-        #print('All Guides: ', guides)
+            drivers_seniority[key] = driver_s[key][trip]
+
+        print('All Drivers: ', drivers)
+        print('Drivers seniority: ', drivers_seniority)
 
         for num_drivers in range(len(drivers)):
 
@@ -264,64 +271,65 @@ def get_ordered_priority_list(trip, role):
 
             drivers_ordered_priority.append(drivers[max_driver])
 
+            drivers_ordered_seniority.append(drivers_seniority[max_driver])
+
             del drivers[max_driver]
+            del drivers_seniority[max_driver]
 
         #print('Guides (ordered): ', guides_ordered_name)
         drivers_ordered_name = list(reversed(drivers_ordered_name))
         drivers_ordered_priority = list(reversed(drivers_ordered_priority))
-        #print('Guides (reversed): ', guides_ordered_name)
-        #print('Guides (reversed): ', guides_ordered_priority)
+        drivers_ordered_seniority = list(reversed(drivers_ordered_seniority))
+        print('Drivers (reversed): ', drivers_ordered_name)
+        print('Guides (reversed): ', drivers_ordered_priority)
 
-        for number in drivers_ordered_priority:
+        #for number in drivers_ordered_priority:
 
-            if number == 0:
+            #if number == 0:
 
-                i = drivers_ordered_priority.index(number)
+                #i = drivers_ordered_priority.index(number)
 
-                del drivers_ordered_priority[i]
-                del drivers_ordered_name[i]
+                #del drivers_ordered_priority[i]
+                #del drivers_ordered_name[i]
 
-        #calculated_priority_guides = calculate_priority(guide_priority_matrix, guides_ordered_name, guides_ordered_priority, trip, role)
-        return drivers_ordered_name
+        print("Drivers Priority Matrix: ", driver_priority_matrix)
+        print("Drivers Ordered Name: ", drivers_ordered_name)
+        print("Drivers Ordered Priority: ", drivers_ordered_priority)
+        print("Drivers Ordered Seniority: ", drivers_ordered_seniority)
+
+        calculated_priority_drivers = calculate_priority(driver_priority_matrix, drivers_ordered_name, drivers_ordered_priority, drivers_ordered_seniority, trip, role)
+        return calculated_priority_drivers
 
 ################################################################################
 
-def calculate_priority(guide_priority_matrix, guides_ordered_name, guides_ordered_priority, trip, role):
+def calculate_priority(driver_priority_matrix, driver_ordered_name, driver_ordered_priority, drivers_ordered_seniority, trip, role):
 
-    priority_difference=[]
-    calculated_priority_guides=[]
+    calculated_priority_drivers=[]
 
-    for guides in range(len(guides_ordered_name)):
+    for index in range(len(driver_ordered_name)):
 
-        guide_top_priority = min(guide_priority_matrix[guides_ordered_name[guides]])
         #print(guides_ordered_name[guides],'\'s priority for ', role, trip,': ', guides_ordered_priority[guides])
         #print(guides_ordered_name[guides],'\'s top priority ', role, trip,': ', guide_top_priority)
-        difference = guides_ordered_priority[guides] - guide_top_priority
 
-        if difference >= guide_top_priority:
+        seniority = drivers_ordered_seniority[index]
+        print("Seniority: ", seniority)
+        if seniority == 1:
 
-            priority_difference.append(guides_ordered_priority[guides] - guide_top_priority)
-            #print('Priority Differece: ', priority_difference[guides])
+            calculated_priority_drivers.append(driver_ordered_name[index])
+            print("appended ", calculated_priority_drivers)
 
-        else:
+    for index in range(len(driver_ordered_name)):
 
-            priority_difference.append(1)
+        seniority = drivers_ordered_seniority[index]
+
+        if seniority == 0:
+
+            calculated_priority_drivers.append(driver_ordered_name[index])
+
     #print('Priority Difference: ', priority_difference)
 
-    for guides in range(len(guides_ordered_name)):
-
-        max_difference = max(priority_difference)
-        highest_priority_guide = guides_ordered_name[priority_difference.index(max_difference)]
-        calculated_priority_guides.append(highest_priority_guide)
-
-        del guides_ordered_name[priority_difference.index(max_difference)]
-        del priority_difference[priority_difference.index(max_difference)]
-        #print('Priority Difference: ', priority_difference)
-        #print('Guide for', trip, role,': ', highest_priority_guide)
-        #print('Calculated Priority: ', calculated_priority_guides)
-
-    #print('Calculated Priority: ', calculated_priority_guides)
-    return calculated_priority_guides
+    print("Calculated Priority: ", calculated_priority_drivers)
+    return calculated_priority_drivers
 
 
 #get_ordered_priority_list(0,3)
@@ -351,7 +359,7 @@ def get_driver_priority_matrix():
             #a/b
             trip_worked_quotient = []
 
-            #sum(s(i)w(i))
+            #sum(d(i)w(i))
             sum_weights = 0
 
             #s(i)
@@ -405,8 +413,17 @@ def get_driver_priority_matrix():
                 print(driver_list[num_drivers][create_schedule.schedule_dictionaries.trip_types[x]
                                             + "_seniority"])
 
-                if driver_list[num_drivers][create_schedule.schedule_dictionaries.trip_types[x]
-                                            + "_seniority"] == 1:
+                if driver_list[num_drivers][create_schedule.schedule_dictionaries.trip_types[x]] == 1:
+
+                    print("appended 1")
+                    d_of_i.append(1)
+
+                else:
+                    print("appended 0")
+                    d_of_i.append(0)
+
+
+                if driver_list[num_drivers][create_schedule.schedule_dictionaries.trip_types[x]+"_seniority"] == 1:
 
                     print("appended 1")
                     s_of_i.append(1)
@@ -415,46 +432,23 @@ def get_driver_priority_matrix():
                     print("appended 0")
                     s_of_i.append(0)
 
-                if driver_list[num_drivers][create_schedule.schedule_dictionaries.trip_types[x]] == '1':
-
-                    d_of_i.append(1)
-
-                else:
-
-                    d_of_i.append(0)
-
                 print(driver_name, 'can ', d_of_i[x])
-
-                print("s(i): ", s_of_i)
                 print("trip_weight[x]: ",create_schedule.schedule_dictionaries.trip_weight[x])
 
-                sum_weights += float(s_of_i[x])*create_schedule.schedule_dictionaries.trip_weight[x]
+                sum_weights += float(d_of_i[x])*create_schedule.schedule_dictionaries.trip_weight[x]
 
 
                 print('sum_weights: ', sum_weights)
                 print('trip_worked_quotient: ', trip_worked_quotient)
                 print('d(i): ', d_of_i)
 
-
-
-            for index in s_of_i:
-
-                if s_of_i[index] == 0:
-
-                    s_of_i[index] = 1
-
-                else:
-
-                    s_of_i[index] = 0
-
             x = 0
-
             for i in range(0,10,2):
 
                 #print("#######################################################")
                 #print("i: ", i)
                 #print("trip_worked_quotient[i]*trip_worked_quotient[i+1]: ", (0.4)*(trip_worked_quotient[i]
-        #        #    +trip_worked_quotient[i+1])**2)
+                #    +trip_worked_quotient[i+1])**2)
         #        print("sum_weights: ", (0.2)*sum_weights)
         #        print("s_of_i[x]: ", (0.4)*s_of_i[x])
         #        print("d_of_i[x]: ", d_of_i[x])
@@ -464,23 +458,21 @@ def get_driver_priority_matrix():
         #        )*d_of_i[x])
         #        print("#######################################################")
 
-                current_driver_priorities.append(
-                                            (  (trip_worked_quotient[i]
-                                                +trip_worked_quotient[i+1])**2
-                                                +create_schedule.schedule_dictionaries.trip_weight[x]*s_of_i[x]
-                                            )*d_of_i[x]
-                                         )
-
+                current_driver_priorities.append(   trip_worked_quotient[i]
+                                                    *trip_worked_quotient[i+1]
+                                                    *sum_weights
+                                                    *d_of_i[x]
+                                                )
                 x+=1
 
                 print('current driver priorities: ', i ,' ', current_driver_priorities)
 
-            driver_dict[driver_name] = current_driver_priorities
+            driver_dict[driver_name] = (current_driver_priorities, s_of_i)
 
     for driver in range(len(driver_list)):
 
         driver_name = driver_list[driver]['name']
 
-        print(driver_name, ': ',driver_dict[driver_name][4])
+        print(driver_name, ': ',driver_dict[driver_name][0][4])
 
     return driver_dict
