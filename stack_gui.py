@@ -161,7 +161,8 @@ class Ui_Form(object):
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(50)
         self.tableWidget.setRowCount(10)
-        self.tableWidget.setStyleSheet("background-color: #FFFFFF")
+        self.tableWidget.setStyleSheet("Background-color: rgba(255,255,255,200);\n"
+                                        "  border-radius: 5%;\n")
         item = QtGui.QTableWidgetItem()
         self.tableWidget.setItem(0, 0, item)
         self.submit_changes = QtGui.QPushButton(self.view_staff)
@@ -194,7 +195,8 @@ class Ui_Form(object):
         self.tableWidget_5.setObjectName("tableWidget_5")
         self.tableWidget_5.setColumnCount(24)
         self.tableWidget_5.setRowCount(10)
-        self.tableWidget_5.setStyleSheet("background-color: #FFFFFF")
+        self.tableWidget_5.setStyleSheet("Background-color: rgba(255,255,255,200);\n"
+                                        "  border-radius: 5%;\n")
         item_2 = QtGui.QTableWidgetItem()
         self.tableWidget_5.setItem(0, 0, item_2)
 
@@ -807,16 +809,22 @@ class Ui_Form(object):
         self.view_schedule = QtGui.QWidget()
         self.view_schedule.setObjectName("view_schedule")
         self.view_schedule.setStyleSheet("background-color:#FFFFFF")
+
+        self.background = QtGui.QLabel(self.view_schedule)
+        self.background.setPixmap(QtGui.QPixmap('background.jpg'))
+        self.background.setGeometry(QtCore.QRect(0, 0, 1200, 795))
+
         self.tableWidget_2 = QtGui.QTableWidget(self.view_schedule)
-        self.tableWidget_2.setGeometry(QtCore.QRect(20, 50, 950, 1000))
+        self.tableWidget_2.setGeometry(QtCore.QRect(20, 50, 884, 700))
         self.tableWidget_2.setRowCount(56)
         self.tableWidget_2.setColumnCount(7)
         self.tableWidget_2.setObjectName("tableWidget_2")
-        self.tableWidget_2.setStyleSheet("background-color: #FFFFFF")
+        self.tableWidget_2.setStyleSheet("Background-color: rgba(255,255,255,200);\n"
+                                        "  border-radius: 5%;\n")
         self.tableWidget_2.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
 
         self.back_4 = QtGui.QPushButton(self.view_schedule)
-        self.back_4.setGeometry(QtCore.QRect(1050, 50, 93, 28))
+        self.back_4.setGeometry(QtCore.QRect(1015, 50, 93, 28))
         self.back_4.clicked.connect(self.back_page)
         self.back_4.show()
         self.back_4.setStyleSheet("  border: none;\n"
@@ -830,19 +838,19 @@ class Ui_Form(object):
                                         "  color: #ee7838;")
 
         self.start_date = QtGui.QDateEdit(self.view_schedule)
-        self.start_date.setGeometry(QtCore.QRect(970, 170, 110, 22))
+        self.start_date.setGeometry(QtCore.QRect(955, 170, 100, 22))
         self.start_date.setStyleSheet("background-color: #FFFFFF")
         self.start_date.setDateTime(QtCore.QDateTime(QtCore.QDate(2018, 6, 18), QtCore.QTime(0, 0, 0)))
         self.start_date.setObjectName("start_date")
         self.end_date = QtGui.QDateEdit(self.view_schedule)
-        self.end_date.setGeometry(QtCore.QRect(1081, 170, 110, 22))
+        self.end_date.setGeometry(QtCore.QRect(1065, 170, 100, 22))
         self.end_date.setDateTime(QtCore.QDateTime(QtCore.QDate(2018, 6, 25), QtCore.QTime(0, 0, 0)))
         self.end_date.setStyleSheet("background-color: #FFFFFF")
         self.end_date.setObjectName("start_date")
 
 
         self.submit_date_range = QtGui.QPushButton(self.view_schedule)
-        self.submit_date_range.setGeometry(QtCore.QRect(1040, 200, 93, 28))
+        self.submit_date_range.setGeometry(QtCore.QRect(1015, 225, 93, 28))
         self.submit_date_range.setStyleSheet("  border: none;\n"
                                         "  padding: 0.5%;\n"
                                         "  cursor: pointer;\n"
@@ -1192,12 +1200,7 @@ class Ui_Form(object):
 
 
     def submit_dates(self):
-        self.tableWidget_2.clear()
-        self.tableWidget_2.setGeometry(QtCore.QRect(20, 50, 884, 1000))
-        self.back_4.setGeometry(QtCore.QRect(984, 50, 93, 28))
-        self.submit_date_range.setGeometry(QtCore.QRect(984, 200, 93, 28))
-        self.start_date.setGeometry(QtCore.QRect(914, 170, 110, 22))
-        self.end_date.setGeometry(QtCore.QRect(1034, 170, 110, 22))
+
         temp_date = self.start_date.dateTime()
         start = self.start_date.textFromDateTime(temp_date)
         temp_date = self.end_date.dateTime()
@@ -1358,10 +1361,13 @@ class Ui_Form(object):
 
             row+=1
 
-
+        for column in range(0,7):
+            self.tableWidget_2.setHorizontalHeaderItem(column, QtGui.QTableWidgetItem(column_label[column]))
 
         while date != end_date:
             print(date)
+
+
             for row in range(0, 56, 8):
 
                 self.tableWidget_2.setItem(row, column_number, QtGui.QTableWidgetItem(""))

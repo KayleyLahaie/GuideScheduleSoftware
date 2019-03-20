@@ -7,6 +7,7 @@ import excel_scraper
 from create_schedule import schedule_util
 from create_schedule import schedule_dictionaries
 from create_schedule import get_priority
+from manage_staff import guide
 
 from PySide import QtCore, QtGui
 
@@ -21,11 +22,11 @@ from sqlalchemy.orm import sessionmaker
 
 schedule_engine = create_engine('sqlite:///trips.db', echo=False)
 schedule_base = declarative_base()
-schedule_session = sessionmaker(bind=schedule_engine)
 
+schedule_session = sessionmaker(bind=schedule_engine)
 session_schedule = schedule_session()
 
-from manage_staff import guide
+
 
 session_guide = guide.guide_session()
 
@@ -609,31 +610,89 @@ def copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
 
 def create_schedule_day(gui_window, scraper_object, current_date):
 
-    current_date_object = add_new_date(current_date)
-    temp_guide = 0
-    print("\n")
-    print("Creating Schedule for ", current_date)
-    trips = scraper_object.get_day(current_date)
-    trip_role_assignment = {}
-    num_clients = {}
-    num_drivers = {}
-    num_guides = {}
-    max_drivers = [0,0,0,0,0,0,0,0]
-    max_guides = [0,0,0,0,0,0,0,0]
+    conn_original_trips = sqlite3.connect('trips.db')
+    conn_original_staff = sqlite3.connect('staff.db')
 
-    num_safety = 0
+    conn_backup_trips = sqlite3.connect('trips_backup.db')
+    conn_backup_staff = sqlite3.connect('staff_backup.db')
 
-    previous_date = schedule_util.calculate_previous_date(current_date)
+    sqlitebck.copy(conn_original_trips, conn_backup_trips)
+    sqlitebck.copy(conn_original_staff, conn_backup_staff)
 
-    for trip_name in trips:
+    conn_original_trips.close()
+    conn_original_staff.close()
 
-        print(trips)
+    conn_backup_trips.close()
+    conn_backup_staff.close()
 
-        num_clients[trip_name] = int(trips[trip_name])
+    try:
 
-        if trip_name == "Ticket to Ride - 09:30:00":
+        current_date_object = add_new_date(current_date)
+        temp_guide = 0
+        print("\n")
+        print("Creating Schedule for ", current_date)
+        trips = scraper_object.get_day(current_date)
+        trip_role_assignment = {}
+        num_clients = {}
+        num_drivers = {}
+        num_guides = {}
+        max_drivers = [0,0,0,0,0,0,0,0]
+        max_guides = [0,0,0,0,0,0,0,0]
 
-            if num_clients[trip_name] > 0:
+        num_safety = 0
+
+        previous_date = schedule_util.calculate_previous_date(current_date)
+
+        for trip_name in trips:
+
+            print(trips)
+
+            num_clients[trip_name] = int(trips[trip_name])
+
+            if trip_name == "Ticket to Ride - 09:30:00":
+
+                if num_clients[trip_name] > 0:
+
+                    num_guides[trip_name] = int((num_clients[trip_name] // 10)
+                                            +(num_clients[trip_name] % 10 > 0))
+
+                    num_drivers[trip_name] = int((num_clients[trip_name] // 20)
+                                            +(num_clients[trip_name] % 20 > 0))
+
+                    max_guides[
+                        create_schedule.schedule_dictionaries.max_guides_trip_swictch[
+                            trip_name
+                        ]
+                    ] = num_guides[trip_name]
+
+                    max_drivers[
+                        create_schedule.schedule_dictionaries.max_guides_trip_swictch[
+                            trip_name
+                        ]
+                    ] = num_drivers[trip_name]
+
+                    DialogBox = QtGui.QDialog()
+                    ui_guides = popups.overnight_popup.Ui_overnight_popup()
+                    ui_guides.setupUi(DialogBox, num_guides[trip_name],
+                                        current_date,
+                                        trip_role_assignment, DialogBox)
+                    DialogBox.show()
+
+                    print("shown")
+
+                    if DialogBox.exec_():
+
+                        print("exec")
+                        trip_role_assignment = ui_guides.return_data()
+
+                        print("trip role assignemt ",trip_role_assignment)
+
+                else:
+
+                    num_guides[trip_name] = 0
+                    num_drivers[trip_name] = 0
+
+            else:
 
                 num_guides[trip_name] = int((num_clients[trip_name] // 10)
                                         +(num_clients[trip_name] % 10 > 0))
@@ -641,208 +700,175 @@ def create_schedule_day(gui_window, scraper_object, current_date):
                 num_drivers[trip_name] = int((num_clients[trip_name] // 20)
                                         +(num_clients[trip_name] % 20 > 0))
 
-                max_guides[
-                    create_schedule.schedule_dictionaries.max_guides_trip_swictch[
-                        trip_name
-                    ]
-                ] = num_guides[trip_name]
+                print("tripname = ", trip_name)
+                print("num_guides= ", num_guides[trip_name])
+                print("num_drivers= ", num_drivers[trip_name])
+                print("max= ", create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name])
 
-                max_drivers[
-                    create_schedule.schedule_dictionaries.max_guides_trip_swictch[
-                        trip_name
-                    ]
-                ] = num_drivers[trip_name]
+                if num_guides[trip_name] > max_guides[create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]]:
 
-                DialogBox = QtGui.QDialog()
-                ui_guides = popups.overnight_popup.Ui_overnight_popup()
-                ui_guides.setupUi(DialogBox, num_guides[trip_name],
-                                    current_date,
-                                    trip_role_assignment, DialogBox)
-                DialogBox.show()
+                    max_guides[
+                        create_schedule.schedule_dictionaries.max_guides_trip_swictch[
+                            trip_name
+                        ]
+                    ] = num_guides[trip_name]
 
-                print("shown")
+                if num_drivers[trip_name] > max_drivers[create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]]:
+                    max_drivers[
+                        create_schedule.schedule_dictionaries.max_guides_trip_swictch[
+                            trip_name
+                        ]
+                    ] = num_drivers[trip_name]
 
-                if DialogBox.exec_():
+                print("\n")
+                print("For: ", trip_name)
+                print ("Number of Clients: ", num_clients[trip_name])
+                print ("Number of Guides Needed: ", num_guides[trip_name])
+                print ("Number of Drivers Needed: ", num_drivers[trip_name])
 
-                    print("exec")
-                    trip_role_assignment = ui_guides.return_data()
+        total_guides_needed = 0
+        total_drivers_needed = 0
 
-                    print("trip role assignemt ",trip_role_assignment)
+        for x in num_guides:
 
-            else:
+            total_guides_needed += num_guides[x]
 
-                num_guides[trip_name] = 0
-                num_drivers[trip_name] = 0
+        for x in num_drivers:
 
-        else:
+            total_drivers_needed += num_drivers[x]
 
-            num_guides[trip_name] = int((num_clients[trip_name] // 10)
-                                    +(num_clients[trip_name] % 10 > 0))
+        if total_guides_needed > len(manage_staff.staff_util.get_total_guides()):
 
-            num_drivers[trip_name] = int((num_clients[trip_name] // 20)
-                                    +(num_clients[trip_name] % 20 > 0))
+            DialogBox = QtGui.QDialog()
+            ui_guides = popups.not_enough_guides_popup.Ui_not_enough_guides_popup()
+            ui_guides.setupUi(DialogBox, DialogBox)
+            DialogBox.show()
 
-            print("tripname = ", trip_name)
-            print("num_guides= ", num_guides[trip_name])
-            print("num_drivers= ", num_drivers[trip_name])
-            print("max= ", create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name])
+            print("shown")
 
-            if num_guides[trip_name] > max_guides[create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]]:
+            if DialogBox.exec_():
+                print("exec")
+                temp_guide = ui_guides.return_temp_guide()
 
-                max_guides[
-                    create_schedule.schedule_dictionaries.max_guides_trip_swictch[
-                        trip_name
-                    ]
-                ] = num_guides[trip_name]
+                temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
+                    manage_staff.guide.guide.name.in_(
+                        [temp_guide])).update(
+                            {'in_stream':'true'},synchronize_session=False
+                        )
 
-            if num_drivers[trip_name] > max_drivers[create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]]:
-                max_drivers[
-                    create_schedule.schedule_dictionaries.max_guides_trip_swictch[
-                        trip_name
-                    ]
-                ] = num_drivers[trip_name]
+                session_guide.commit()
 
-            print("\n")
-            print("For: ", trip_name)
-            print ("Number of Clients: ", num_clients[trip_name])
-            print ("Number of Guides Needed: ", num_guides[trip_name])
-            print ("Number of Drivers Needed: ", num_drivers[trip_name])
+                print("Set to true : ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
 
-    total_guides_needed = 0
-    total_drivers_needed = 0
+        #if total_drivers_needed > len(manage_staff.staff_util.get_total_drivers()):
+    #
+    #        DialogBox = QtGui.QDialog()
+    #        ui_guides = popups.not_enough_guides_popup.Ui_not_enough_guides_popup()
+    #        ui_guides.setupUi(DialogBox, DialogBox)
+    #        DialogBox.show()
+    #
+    #        print("shown")
+    #
+    #        if DialogBox.exec_():
+    #            print("exec")
+    #            temp_guide = ui_guides.return_temp_guide()
+    #
+    #            temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
+    #                manage_staff.guide.guide.name.in_(
+    #                    [temp_guide])).update(
+    #                        {'in_stream':'true'},synchronize_session=False
+    #                    )
+    #
+    #            session_guide.commit()
+    #
+    #            print("Set to true : ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
 
-    for x in num_guides:
+        for trip in create_schedule.schedule_dictionaries.trip_number_switch:
 
-        total_guides_needed += num_guides[x]
+            if trip not in num_clients:
 
-    for x in num_drivers:
+                num_clients[trip] = 0
+                num_guides[trip] = 0
+                num_drivers[trip] = 0
 
-        total_drivers_needed += num_drivers[x]
+                print("\n")
+                print("For: ", trip_name)
+                print ("Number of Clients: ", num_clients)
+                print ("Number of Guides Needed: ", num_guides)
+                print ("Number of Drivers Needed: ", num_drivers)
 
-    if total_guides_needed > len(manage_staff.staff_util.get_total_guides()):
+        for trip in range(len(create_schedule.schedule_dictionaries.trip_types)):
 
-        DialogBox = QtGui.QDialog()
-        ui_guides = popups.not_enough_guides_popup.Ui_not_enough_guides_popup()
-        ui_guides.setupUi(DialogBox, DialogBox)
-        DialogBox.show()
+            if trip != 4:
 
-        print("shown")
+                print("max_drivers: ", max_drivers[trip])
 
-        if DialogBox.exec_():
-            print("exec")
-            temp_guide = ui_guides.return_temp_guide()
+                for role_needed in range(max_drivers[trip]):
+
+                    print("Num drivers needed ", max_drivers[trip], "for ", trip)
+
+                    create_schedule_role(role_needed+5, current_date, trip_role_assignment, trip)
+
+                print("max_guides: ", max_guides[trip])
+
+                if (max_guides[trip] <= 4 and max_guides[trip] > 1 ):
+
+                    for role_needed in range(max_guides[trip]):
+
+                        print("Num guides needed", max_guides[trip], "for ", trip)
+
+                        create_schedule_role(role_needed, current_date, trip_role_assignment, trip)
+
+
+                elif(max_guides[trip] == 1):
+
+                    create_schedule_role(0, current_date, trip_role_assignment, trip)
+                    create_schedule_role(4, current_date, trip_role_assignment, trip)
+
+        #print(trips)
+        #print(num_guides)
+        #print('trip role assignment: ', trip_role_assignment)
+
+        copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
+                            num_clients, num_guides,
+                            max_guides, max_drivers, current_date_object, current_date)
+
+        if temp_guide != 0:
 
             temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
-                manage_staff.guide.guide.name.in_(
-                    [temp_guide])).update(
-                        {'in_stream':'true'},synchronize_session=False
-                    )
+                                    manage_staff.guide.guide.name.in_(
+                                        [temp_guide])).update(
+                                            {'in_stream':'false'},synchronize_session=False
+                                        )
 
             session_guide.commit()
 
-            print("Set to true : ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
+            print("returned to false: ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
 
-    #if total_drivers_needed > len(manage_staff.staff_util.get_total_drivers()):
-#
-#        DialogBox = QtGui.QDialog()
-#        ui_guides = popups.not_enough_guides_popup.Ui_not_enough_guides_popup()
-#        ui_guides.setupUi(DialogBox, DialogBox)
-#        DialogBox.show()
-#
-#        print("shown")
-#
-#        if DialogBox.exec_():
-#            print("exec")
-#            temp_guide = ui_guides.return_temp_guide()
-#
-#            temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
-#                manage_staff.guide.guide.name.in_(
-#                    [temp_guide])).update(
-#                        {'in_stream':'true'},synchronize_session=False
-#                    )
-#
-#            session_guide.commit()
-#
-#            print("Set to true : ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
+        #if temp_driver != 0:
+    #
+    #        temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
+    #                                manage_staff.guide.guide.name.in_(
+    #                                    [temp_guide])).update(
+    #                                        {'in_stream':'false'},synchronize_session=False
+    #                                    )
+    #
+    #        session_guide.commit()
+    #
+    #        print("returned to false: ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
 
-    for trip in create_schedule.schedule_dictionaries.trip_number_switch:
+    except:
 
-        if trip not in num_clients:
+        conn_original_trips = sqlite3.connect('///trips.db')
+        conn_original_staff = sqlite3.connect('///staff.db')
 
-            num_clients[trip] = 0
-            num_guides[trip] = 0
-            num_drivers[trip] = 0
+        conn_backup_trips = sqlite3.connect('///trips_backup.db')
+        conn_backup_staff = sqlite3.connect('///staff_backup.db')
 
-            print("\n")
-            print("For: ", trip_name)
-            print ("Number of Clients: ", num_clients)
-            print ("Number of Guides Needed: ", num_guides)
-            print ("Number of Drivers Needed: ", num_drivers)
-
-    for trip in range(len(create_schedule.schedule_dictionaries.trip_types)):
-
-        if trip != 4:
-
-            print("max_drivers: ", max_drivers[trip])
-
-            for role_needed in range(max_drivers[trip]):
-
-                print("Num drivers needed ", max_drivers[trip], "for ", trip)
-
-                create_schedule_role(role_needed+5, current_date, trip_role_assignment, trip)
-
-            print("max_guides: ", max_guides[trip])
-
-            if (max_guides[trip] <= 4 and max_guides[trip] > 1 ):
-
-                for role_needed in range(max_guides[trip]):
-
-                    print("Num guides needed", max_guides[trip], "for ", trip)
-
-                    create_schedule_role(role_needed, current_date, trip_role_assignment, trip)
+        sqlitebck.copy(conn_backup_trips, conn_original_trips)
+        sqlitebck.copy(conn_backup_staff, conn_original_staff)
 
 
-            elif(max_guides[trip] == 1):
-
-                create_schedule_role(0, current_date, trip_role_assignment, trip)
-                create_schedule_role(4, current_date, trip_role_assignment, trip)
-
-
-
-
-
-
-    #print(trips)
-    #print(num_guides)
-    #print('trip role assignment: ', trip_role_assignment)
-
-    copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
-                        num_clients, num_guides,
-                        max_guides, max_drivers, current_date_object, current_date)
-
-    if temp_guide != 0:
-
-        temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
-                                manage_staff.guide.guide.name.in_(
-                                    [temp_guide])).update(
-                                        {'in_stream':'false'},synchronize_session=False
-                                    )
-
-        session_guide.commit()
-
-        print("returned to false: ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
-
-    #if temp_driver != 0:
-#
-#        temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
-#                                manage_staff.guide.guide.name.in_(
-#                                    [temp_guide])).update(
-#                                        {'in_stream':'false'},synchronize_session=False
-#                                    )
-#
-#        session_guide.commit()
-#
-#        print("returned to false: ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
 
 ################################################################################
 

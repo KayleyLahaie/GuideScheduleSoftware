@@ -413,7 +413,8 @@ def get_driver_priority_matrix():
                 print(driver_list[num_drivers][create_schedule.schedule_dictionaries.trip_types[x]
                                             + "_seniority"])
 
-                if driver_list[num_drivers][create_schedule.schedule_dictionaries.trip_types[x]] == 1:
+                print("d of i ",driver_list[num_drivers][create_schedule.schedule_dictionaries.trip_types[x]])
+                if driver_list[num_drivers][create_schedule.schedule_dictionaries.trip_types[x]] == '1':
 
                     print("appended 1")
                     d_of_i.append(1)
@@ -422,7 +423,7 @@ def get_driver_priority_matrix():
                     print("appended 0")
                     d_of_i.append(0)
 
-
+                print("s of i ", driver_list[num_drivers][create_schedule.schedule_dictionaries.trip_types[x]+"_seniority"])
                 if driver_list[num_drivers][create_schedule.schedule_dictionaries.trip_types[x]+"_seniority"] == 1:
 
                     print("appended 1")
@@ -460,7 +461,7 @@ def get_driver_priority_matrix():
 
                 current_driver_priorities.append(   trip_worked_quotient[i]
                                                     *trip_worked_quotient[i+1]
-                                                    *sum_weights
+                                                    +sum_weights
                                                     *d_of_i[x]
                                                 )
                 x+=1
