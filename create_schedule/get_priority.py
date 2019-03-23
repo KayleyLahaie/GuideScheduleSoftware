@@ -307,23 +307,19 @@ def calculate_priority(driver_priority_matrix, driver_ordered_name, driver_order
     calculated_priority_drivers=[]
 
     for index in range(len(driver_ordered_name)):
-
         #print(guides_ordered_name[guides],'\'s priority for ', role, trip,': ', guides_ordered_priority[guides])
         #print(guides_ordered_name[guides],'\'s top priority ', role, trip,': ', guide_top_priority)
-
         seniority = drivers_ordered_seniority[index]
         print("Seniority: ", seniority)
-        if seniority == 1:
 
+        if seniority == 1:
             calculated_priority_drivers.append(driver_ordered_name[index])
             print("appended ", calculated_priority_drivers)
 
     for index in range(len(driver_ordered_name)):
-
         seniority = drivers_ordered_seniority[index]
 
         if seniority == 0:
-
             calculated_priority_drivers.append(driver_ordered_name[index])
 
     #print('Priority Difference: ', priority_difference)
@@ -337,20 +333,15 @@ def calculate_priority(driver_priority_matrix, driver_ordered_name, driver_order
 ################################################################################
 
 def get_driver_priority_matrix():
-
     driver_dict = {}
-
     driver_object = session_guide.query(manage_staff.driver.driver)
-
     driver_list = [u.__dict__ for u in driver_object.all()]
 
 
     for num_drivers in range(len(driver_list)):
 
         if driver_list[num_drivers]['in_stream'] == 'true':
-
             driver_name = driver_list[num_drivers]['name']
-
             current_driver_priorities = []
 
             #x/y
@@ -370,18 +361,14 @@ def get_driver_priority_matrix():
 
 
             for x in range(len(create_schedule.schedule_dictionaries.trip_types)):
-
                 #a
                 times_trip_worked = []
                 #b
                 total_times_trip_worked = []
 
                 for z in range(len(create_schedule.schedule_dictionaries.time_types)):
-
                     total_times_trip_worked.append(0)
-
                     times_trip_worked.append(0)
-
                     times_trip_worked[z] = driver_list[num_drivers]["driven_"
                                                 +create_schedule.schedule_dictionaries.time_types[z]
                                                 +create_schedule.schedule_dictionaries.trip_types[x]
@@ -389,7 +376,6 @@ def get_driver_priority_matrix():
                     print(driver_name, ' worked ', create_schedule.schedule_dictionaries.trip_types[x],' ', times_trip_worked[z], 'times')
 
                     for drivers in range(len(driver_list)):
-
                         total_times_trip_worked[z] += driver_list[drivers]["driven_"
                                                             +create_schedule.schedule_dictionaries.time_types[z]
                                                             +create_schedule.schedule_dictionaries.trip_types[x]]
@@ -399,11 +385,9 @@ def get_driver_priority_matrix():
                     print(' all guides worked ', create_schedule.schedule_dictionaries.trip_types[x],' ', total_times_trip_worked[z], 'times')
 
                     if total_times_trip_worked[z] != 0:
-
                         trip_worked_quotient.append(times_trip_worked[z]/total_times_trip_worked[z])
 
                     else:
-
                         trip_worked_quotient.append(0)
 
 
@@ -465,15 +449,12 @@ def get_driver_priority_matrix():
                                                     *d_of_i[x]
                                                 )
                 x+=1
-
                 print('current driver priorities: ', i ,' ', current_driver_priorities)
 
             driver_dict[driver_name] = (current_driver_priorities, s_of_i)
 
     for driver in range(len(driver_list)):
-
         driver_name = driver_list[driver]['name']
-
         print(driver_name, ': ',driver_dict[driver_name][0][4])
 
     return driver_dict

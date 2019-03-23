@@ -1,11 +1,11 @@
-from PySide import QtCore, QtGui
+from PySide2 import QtCore, QtGui, QtWidgets
 import sys
 import stack_gui
 
 
 
-app = QtGui.QApplication(sys.argv)
-Form = QtGui.QWidget()
+app = QtWidgets.QApplication(sys.argv)
+Form = QtWidgets.QWidget()
 ui = stack_gui.Ui_Form()
 ui.setupUi(Form)
 Form.show()
