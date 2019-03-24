@@ -7,7 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PySide2 import QtCore, QtGui
+from PySide2 import QtCore, QtGui, QtWidgets
 import create_schedule
 from create_schedule import schedule_dictionaries
 
@@ -38,7 +38,7 @@ class Ui_overnight_popup(object):
         font = QtGui.QFont()
         font.setFamily("Malgun Gothic")
 
-        self.main_label = QtGui.QLabel(overnight_popup)
+        self.main_label = QtWidgets.QLabel(overnight_popup)
         self.main_label.setGeometry(QtCore.QRect(25, 25, 650, 50))
         self.main_label.setFont(font)
         self.main_label.setStyleSheet( " background-color: #006898;\n"
@@ -61,7 +61,7 @@ class Ui_overnight_popup(object):
                                     create_schedule.schedule_dictionaries.guide_roles_converter[n]
                                 )
 
-            self.comboBoxes[n] = QtGui.QComboBox(overnight_popup)
+            self.comboBoxes[n] = QtWidgets.QComboBox(overnight_popup)
             self.comboBoxes[n].setGeometry(QtCore.QRect(x_text, y_text, 200, 30))
             self.comboBoxes[n].setObjectName("comboBox")
 
@@ -70,7 +70,7 @@ class Ui_overnight_popup(object):
             for m in range(len(guides_available)):
                 self.comboBoxes[n].addItem(guides_available[m])
 
-            self.labels[n] = QtGui.QLabel(overnight_popup)
+            self.labels[n] = QtWidgets.QLabel(overnight_popup)
             self.labels[n].setGeometry(QtCore.QRect(x_label, y_label, 125, 60))
             self.labels[n].setStyleSheet("")
             self.labels[n].setObjectName(
@@ -88,7 +88,7 @@ class Ui_overnight_popup(object):
                                     create_schedule.schedule_dictionaries.guide_roles_converter[4]
                                 )
 
-            self.safety_name = QtGui.QComboBox(overnight_popup)
+            self.safety_name = QtWidgets.QComboBox(overnight_popup)
             self.safety_name.setGeometry(QtCore.QRect(x_text, y_text, 200, 30))
             self.safety_name.setObjectName("comboBox")
 
@@ -97,12 +97,12 @@ class Ui_overnight_popup(object):
             for m in range(len(guides_available)):
                 self.safety_name.addItem(guides_available[m])
 
-            self.safety_label = QtGui.QLabel(overnight_popup)
+            self.safety_label = QtWidgets.QLabel(overnight_popup)
             self.safety_label.setGeometry(QtCore.QRect(x_label, y_label, 81, 41))
             self.safety_label.setStyleSheet("")
             self.safety_label.setObjectName("safety_label")
 
-        self.submit = QtGui.QPushButton(overnight_popup)
+        self.submit = QtWidgets.QPushButton(overnight_popup)
         self.submit.setGeometry(QtCore.QRect(575, 400, 100, 35))
         self.submit.setStyleSheet("  border: none;\n"
                                 "  padding: 0.5%;\n"
@@ -122,47 +122,47 @@ class Ui_overnight_popup(object):
 
     def retranslateUi(self, overnight_popup, num_guides, labels, current_date):
 
-        overnight_popup.setWindowTitle(QtGui.QApplication.translate(
+        overnight_popup.setWindowTitle(QtWidgets.QApplication.translate(
             "overnight_popup",
             "Create a New Temporary Guide",
             None,
-            QtGui.QApplication.UnicodeUTF8)
+            0)
         )
 
-        self.main_label.setText(QtGui.QApplication.translate(
+        self.main_label.setText(QtWidgets.QApplication.translate(
             "Form",
             "<html><body><p><span style=\" font-size:18pt;\">Choose Staff for "
             +current_date
             +" Ticket to Ride</span></p></body></html>",
             None,
-            QtGui.QApplication.UnicodeUTF8)
+            0)
         )
 
-        self.submit.setText(QtGui.QApplication.translate(
+        self.submit.setText(QtWidgets.QApplication.translate(
             "overnight_popup",
             "Submit",
             None,
-            QtGui.QApplication.UnicodeUTF8)
+            0)
         )
 
         for n in range(num_guides):
 
-            self.labels[n].setText(QtGui.QApplication.translate(
+            self.labels[n].setText(QtWidgets.QApplication.translate(
                 "overnight_popup",
                 "<html><body><p><span style=\" font-size:14pt;\">"
                 +create_schedule.schedule_dictionaries.overnight_dialog_guide_labels[n]
                 +": </span></p></body></html>",
                 None,
-                QtGui.QApplication.UnicodeUTF8)
+                0)
             )
 
         if num_guides == 1:
 
-            self.safety_label.setText(QtGui.QApplication.translate(
+            self.safety_label.setText(QtWidgets.QApplication.translate(
                 "overnight_popup",
                 "<html><body><p><span style=\" font-size:14pt;\">Safety: </span></p></body></html>",
                 None,
-                QtGui.QApplication.UnicodeUTF8)
+                0)
             )
 
     def submit_staff(self):

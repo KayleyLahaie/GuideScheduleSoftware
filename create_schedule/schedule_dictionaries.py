@@ -205,7 +205,7 @@ trip_switch_excel = {
     'Guaranteed Addiction - 09:30:00': '_guaranteed_addiction_930',
     'Take it Easy - Scenic Float - 09:00:00': '_scenic_float_09',
     'Take it Easy - Scenic Float - 13:00:00': '_scenic_float_13',
-    'Ticket to Ride - 09:30:00': 'overnight_930',
+    'Ticket to Ride - 09:30:00': '_overnight_930',
 }
 
 overnight_dialog_guide_labels = {

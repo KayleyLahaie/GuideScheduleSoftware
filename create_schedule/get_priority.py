@@ -170,7 +170,7 @@ def get_guide_priority_matrix():
 
 ################################################################################
 # trip and role =  numbers from schedule_dictionaries.trip_type and schedule_dictionaries.guide_roles
-def get_ordered_priority_list(trip, role):
+def get_ordered_priority_list(trip, role, class_IV_needed):
 
     if role <= 4:
 
@@ -229,7 +229,6 @@ def get_ordered_priority_list(trip, role):
     else:
 
         print("creating driver schedule for role: ", role)
-
         driver_priority_matrix = get_driver_priority_matrix()
 
         driver_s = {}
@@ -297,35 +296,63 @@ def get_ordered_priority_list(trip, role):
         print("Drivers Ordered Priority: ", drivers_ordered_priority)
         print("Drivers Ordered Seniority: ", drivers_ordered_seniority)
 
-        calculated_priority_drivers = calculate_priority(driver_priority_matrix, drivers_ordered_name, drivers_ordered_priority, drivers_ordered_seniority, trip, role)
+        calculated_priority_drivers = calculate_priority(driver_priority_matrix, drivers_ordered_name, drivers_ordered_priority, drivers_ordered_seniority, trip, role, class_IV_needed)
         return calculated_priority_drivers
 
 ################################################################################
 
-def calculate_priority(driver_priority_matrix, driver_ordered_name, driver_ordered_priority, drivers_ordered_seniority, trip, role):
+def calculate_priority(driver_priority_matrix, driver_ordered_name, driver_ordered_priority, drivers_ordered_seniority, trip, role, class_IV_needed):
 
     calculated_priority_drivers=[]
 
-    for index in range(len(driver_ordered_name)):
-        #print(guides_ordered_name[guides],'\'s priority for ', role, trip,': ', guides_ordered_priority[guides])
-        #print(guides_ordered_name[guides],'\'s top priority ', role, trip,': ', guide_top_priority)
-        seniority = drivers_ordered_seniority[index]
-        print("Seniority: ", seniority)
+    if (class_IV_needed[
+            create_schedule.schedule_dictionaries.trip_types[trip]
+        ] == 1):
 
-        if seniority == 1:
-            calculated_priority_drivers.append(driver_ordered_name[index])
-            print("appended ", calculated_priority_drivers)
+        for index in range(len(driver_ordered_name)):
+            #print(guides_ordered_name[guides],'\'s priority for ', role, trip,': ', guides_ordered_priority[guides])
+            #print(guides_ordered_name[guides],'\'s top priority ', role, trip,': ', guide_top_priority)
+            seniority = drivers_ordered_seniority[index]
+            print("Seniority: ", seniority)
 
-    for index in range(len(driver_ordered_name)):
-        seniority = drivers_ordered_seniority[index]
+            if seniority == 1:
+                calculated_priority_drivers.append(driver_ordered_name[index])
+                print("appended ", calculated_priority_drivers)
 
-        if seniority == 0:
-            calculated_priority_drivers.append(driver_ordered_name[index])
+        for index in range(len(driver_ordered_name)):
+            seniority = drivers_ordered_seniority[index]
 
-    #print('Priority Difference: ', priority_difference)
+            if seniority == 0:
+                calculated_priority_drivers.append(driver_ordered_name[index])
 
-    print("Calculated Priority: ", calculated_priority_drivers)
-    return calculated_priority_drivers
+        #print('Priority Difference: ', priority_difference)
+
+        print("Calculated Priority: ", calculated_priority_drivers)
+        return calculated_priority_drivers
+
+    else:
+
+        for index in range(len(driver_ordered_name)):
+            #print(guides_ordered_name[guides],'\'s priority for ', role, trip,': ', guides_ordered_priority[guides])
+            #print(guides_ordered_name[guides],'\'s top priority ', role, trip,': ', guide_top_priority)
+            driver_object = session_driver.query(manage_staff.driver.driver).filter(
+                                    manage_staff.driver.driver.name == calculate_priority_list[0]
+                               )
+
+            driver_list = [u.__dict__ for u in driver_object.all()]
+
+
+            has_class_IV = driver_list[0]['has_class_IV']
+            print("HAS CLASS IV - GET PRIORITY: ", has_class_IV)
+
+            if has_class_IV == 1:
+                calculated_priority_drivers.append(driver_ordered_name[index])
+                print("appended ", calculated_priority_drivers)
+
+        #print('Priority Difference: ', priority_difference)
+
+        print("Calculated Priority: ", calculated_priority_drivers)
+        return calculated_priority_drivers
 
 
 #get_ordered_priority_list(0,3)
@@ -333,6 +360,7 @@ def calculate_priority(driver_priority_matrix, driver_ordered_name, driver_order
 ################################################################################
 
 def get_driver_priority_matrix():
+    
     driver_dict = {}
     driver_object = session_guide.query(manage_staff.driver.driver)
     driver_list = [u.__dict__ for u in driver_object.all()]

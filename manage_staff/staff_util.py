@@ -66,6 +66,7 @@ def update_num_trips_guide(guide_name, trip_name, priority_change, role):
                                 +create_schedule.schedule_dictionaries.trip_types[trip_name]
                             ))
         num_trips_list = [u.__dict__ for u in num_trips_object.all()]
+
         num_trips = num_trips_list[0][create_schedule.schedule_dictionaries.guide_roles[role]
                                       +create_schedule.schedule_dictionaries.time_types[0]
                                       +create_schedule.schedule_dictionaries.trip_types[trip_name]]

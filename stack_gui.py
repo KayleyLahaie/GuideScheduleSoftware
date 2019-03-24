@@ -17,6 +17,9 @@ import manage_staff
 
 from create_schedule import create_new_schedule
 
+from shutil import copyfile
+import time
+
 session_guide = manage_staff.guide.guide_session()
 session_driver = manage_staff.driver.driver_session()
 
@@ -1083,6 +1086,10 @@ class Ui_Form(object):
         else:
             priority_overnight = int(self.priority_value__overnight.toPlainText())
 
+        latest_date = time.strftime("%x")
+        latest_time = time.strftime("%X")
+
+        copyfile('staff.db', 'staff_'+latest_date+' '+latest_time+'.db')
 
         new_guide = manage_staff.guide.guide(   name = name, in_stream = 'true', has_class_IV = has_class_IV,
                                                 tl_four_hour = four_hour, tl_c_wave = c_wave, tl_full_day = full_day,
@@ -1119,59 +1126,64 @@ class Ui_Form(object):
         self.on_clicked_view_staff()
 
     def create_new_driver(self):
-          name = self.driver_name.toPlainText()
-          has_class_IV = self.class_IVDriver.isChecked()
-          four_hour_drive = self.can_drive_four_hour.isChecked()
-          full_day_drive = self.can_drive_full_day.isChecked()
-          c_wave_drive = self.can_drive_c_wave.isChecked()
-          float_drive = self.can_drive_float.isChecked()
-          overnight_drive = self.can_drive_overnight.isChecked()
+        name = self.driver_name.toPlainText()
+        has_class_IV = self.class_IVDriver.isChecked()
+        four_hour_drive = self.can_drive_four_hour.isChecked()
+        full_day_drive = self.can_drive_full_day.isChecked()
+        c_wave_drive = self.can_drive_c_wave.isChecked()
+        float_drive = self.can_drive_float.isChecked()
+        overnight_drive = self.can_drive_overnight.isChecked()
 
-          if(self.radioButton_22.isChecked()):
-              priority_four_hour = 0
-          else:
-              priority_four_hour = int(self.priority_value_four_hour_2.toPlainText())
-          if(self.radioButton_23.isChecked()):
-              priority_full_day = 0
-          else:
-              priority_full_day = int(self.priority_value_full_day_2.toPlainText())
-          if(self.radioButton_25.isChecked()):
-              priority_c_wave = 0
-          else:
-              priority_c_wave = int(self.priority_value_c_wave_2.toPlainText())
-          if(self.radioButton_27.isChecked()):
-              priority_float = 0
-          else:
-              priority_float = int(self.priority_value_float_2.toPlainText())
-          if(self.radioButton_29.isChecked()):
-              priority_overnight = 0
-          else:
-              priority_overnight = int(self.priority_value__overnight_2.toPlainText())
+        if(self.radioButton_22.isChecked()):
+            priority_four_hour = 0
+        else:
+            priority_four_hour = int(self.priority_value_four_hour_2.toPlainText())
+        if(self.radioButton_23.isChecked()):
+            priority_full_day = 0
+        else:
+            priority_full_day = int(self.priority_value_full_day_2.toPlainText())
+        if(self.radioButton_25.isChecked()):
+            priority_c_wave = 0
+        else:
+            priority_c_wave = int(self.priority_value_c_wave_2.toPlainText())
+        if(self.radioButton_27.isChecked()):
+            priority_float = 0
+        else:
+            priority_float = int(self.priority_value_float_2.toPlainText())
+        if(self.radioButton_29.isChecked()):
+            priority_overnight = 0
+        else:
+            priority_overnight = int(self.priority_value__overnight_2.toPlainText())
 
-          if(self.radioButton_100.isChecked()):
-              seniority_four_hour = 1
-          else:
-             seniority_four_hour = 0
-          if(self.radioButton_104.isChecked()):
-              seniority_full_day = 1
-          else:
-             seniority_full_day = 0
-          if(self.radioButton_106.isChecked()):
-              seniority_c_wave = 1
-          else:
-              seniority_c_wave = 0
-          if(self.radioButton_108.isChecked()):
-              seniority_float = 1
-          else:
-              seniority_float = 0
-          if(self.radioButton_110.isChecked()):
-              seniority_overnight = 1
-          else:
-             seniority_overnight = 0
+        if(self.radioButton_100.isChecked()):
+            seniority_four_hour = 1
+        else:
+            seniority_four_hour = 0
+        if(self.radioButton_104.isChecked()):
+            seniority_full_day = 1
+        else:
+            seniority_full_day = 0
+        if(self.radioButton_106.isChecked()):
+            seniority_c_wave = 1
+        else:
+            seniority_c_wave = 0
+        if(self.radioButton_108.isChecked()):
+            seniority_float = 1
+        else:
+            seniority_float = 0
+        if(self.radioButton_110.isChecked()):
+            seniority_overnight = 1
+        else:
+            seniority_overnight = 0
 
 
+        latest_date = time.strftime("%x")
+        latest_time = time.strftime("%X")
 
-          new_driver = manage_staff.driver.driver(    name = name, in_stream = 'true',
+        copyfile('staff.db', 'staff_'+latest_date+' '+latest_time+'.db')
+
+
+        new_driver = manage_staff.driver.driver(    name = name, in_stream = 'true',
                                                     has_class_IV = has_class_IV, four_hour = four_hour_drive,
                                                     c_wave = c_wave_drive, full_day = full_day_drive,
                                                     scenic_float = float_drive, overnight = overnight_drive,
@@ -1191,10 +1203,10 @@ class Ui_Form(object):
                                                     days_since_last_day_off = 0,
                                             )
 
-          session_driver.add(new_driver)
-          session_driver.commit()
+        session_driver.add(new_driver)
+        session_driver.commit()
 
-          self.on_clicked_view_staff()
+        self.on_clicked_view_staff()
 
 
 
@@ -1395,6 +1407,16 @@ class Ui_Form(object):
         excel_data = excel_scraper.scraper.excel_scraper(path)
         date = excel_data.get_first_date()
         num_days = excel_data.get_num_days()
+
+        latest_day = time.strftime("%d")
+        latest_month = time.strftime("%m")
+        latest_year = time.strftime("%Y")
+        latest_hour = time.strftime("%H")
+        latest_minute = time.strftime("%M")
+        latest_second = time.strftime("%S")
+
+        copyfile('trips.db', 'trips_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
+        copyfile('staff.db', 'staff_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
 
         for x in range(0, num_days):
             create_schedule.create_new_schedule.create_schedule_day(self, excel_data, date)

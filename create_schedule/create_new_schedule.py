@@ -10,7 +10,7 @@ from create_schedule import get_priority
 from manage_staff import guide
 from manage_staff import driver
 
-from PySide2 import QtCore, QtGui
+from PySide2 import QtCore, QtGui, QtWidgets
 
 import popups
 from popups import not_enough_guides_popup
@@ -22,7 +22,11 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import load_only
 
+from shutil import copyfile
+import time
+
 import sys
+import os
 
 schedule_engine = create_engine('sqlite:///trips.db', echo=False)
 schedule_base = declarative_base()
@@ -147,114 +151,160 @@ class schedule(schedule_base):
 ################################################################################
 
 def add_new_date(current_date):
+
+    #latest_day = time.strftime("%d")
+    #latest_month = time.strftime("%m")
+    #latest_year = time.strftime("%Y")
+    #latest_hour = time.strftime("%H")
+    #latest_minute = time.strftime("%M")
+    #latest_second = time.strftime("%S")
+
+    #copyfile('trips.db', 'trips_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
+
+    schedule_object = session_schedule.query(schedule).filter(
+                            schedule.date == current_date)
+
+    schedule_list = [u.__dict__ for u in schedule_object.all()]
+
+    if schedule_list:
+        for trip in create_schedule.schedule_dictionaries.trip_switch_excel:
+            for role in create_schedule.schedule_dictionaries.role_switch:
+                staff_member = schedule_list[0][
+                                    create_schedule.schedule_dictionaries.role_switch[role]
+                                    +create_schedule.schedule_dictionaries.trip_switch_excel[trip]
+                                ]
+                if staff_member:
+                    if role <= 4:
+
+                        manage_staff.staff_util.update_num_trips_guide(
+                                                    staff_member,
+                                                    create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip],
+                                                    -1,
+                                                    create_schedule.schedule_dictionaries.guide_roles_converter[role]
+                                                )
+                    else:
+                        manage_staff.staff_util.update_num_trips_driver(
+                                                    staff_member,
+                                                    create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip],
+                                                    -1)
+
+        session_schedule.query(schedule).filter(
+                    schedule.date == current_date
+                ).delete(synchronize_session=False)
+
+        session_schedule.commit()
+
+
+
     current_date_object = schedule( date = current_date,
-                                    _ready_set_go_10_tentative = '',
-                                    _ready_set_go_14_tentative = '',
-                                    _c_wave_10_tentative = '',
-                                    _c_wave_14_tentative = '',
-                                    _guaranteed_addiction_930_tentative = '',
-                                    _scenic_float_09_tentative = '',
-                                    _scenic_float_13_tentative = '',
-                                    num_clients_ready_set_go_10 = 0,
-                                    num_guides_ready_set_go_10 = 0,
-                                    num_safety_ready_set_go_10 = 0,
-                                    num_drivers_ready_set_go_10 = 0,
-                                    trip_leader_ready_set_go_10 = '',
-                                    second_guide_ready_set_go_10 = '',
-                                    third_guide_ready_set_go_10 = '',
-                                    fourth_guide_ready_set_go_10 = '',
-                                    fifth_guide_ready_set_go_10 = '',
-                                    safety_ready_set_go_10 = '',
-                                    first_driver_ready_set_go_10 = '',
-                                    second_driver_ready_set_go_10 = '',
-                                    num_clients_ready_set_go_14 = 0,
-                                    num_guides_ready_set_go_14 = 0,
-                                    num_safety_ready_set_go_14 = 0,
-                                    num_drivers_ready_set_go_14 = 0,
-                                    trip_leader_ready_set_go_14 = '',
-                                    second_guide_ready_set_go_14 = '',
-                                    third_guide_ready_set_go_14 = '',
-                                    fourth_guide_ready_set_go_14 = '',
-                                    fifth_guide_ready_set_go_14 = '',
-                                    safety_ready_set_go_14 = '',
-                                    first_driver_ready_set_go_14 = '',
-                                    second_driver_ready_set_go_14 = '',
-                                    num_clients_c_wave_10 = 0,
-                                    num_guides_c_wave_10 = 0,
-                                    num_safety_c_wave_10 = 0,
-                                    num_drivers_c_wave_10 = 0,
-                                    trip_leader_c_wave_10 = '',
-                                    second_guide_c_wave_10 = '',
-                                    third_guide_c_wave_10 = '',
-                                    fourth_guide_c_wave_10 = '',
-                                    fifth_guide_c_wave_10 = '',
-                                    safety_c_wave_10 = '',
-                                    first_driver_c_wave_10 = '',
-                                    second_driver_c_wave_10 = '',
-                                    num_clients_c_wave_14 = 0,
-                                    num_guides_c_wave_14 = 0,
-                                    num_safety_c_wave_14 = 0,
-                                    num_drivers_c_wave_14 = 0,
-                                    trip_leader_c_wave_14 = '',
-                                    second_guide_c_wave_14 = '',
-                                    third_guide_c_wave_14 = '',
-                                    fourth_guide_c_wave_14 = '',
-                                    fifth_guide_c_wave_14 = '',
-                                    safety_c_wave_14 = '',
-                                    first_driver_c_wave_14 = '',
-                                    second_driver_c_wave_14 = '',
-                                    num_clients_guaranteed_addiction_930 = 0,
-                                    num_guides_guaranteed_addiction_930 = 0,
-                                    num_safety_guaranteed_addiction_930 = 0,
-                                    num_drivers_guaranteed_addiction_930 = 0,
-                                    trip_leader_guaranteed_addiction_930 = '',
-                                    second_guide_guaranteed_addiction_930 = '',
-                                    third_guide_guaranteed_addiction_930 = '',
-                                    fourth_guide_guaranteed_addiction_930 = '',
-                                    fifth_guide_guaranteed_addiction_930 = '',
-                                    safety_guaranteed_addiction_930 = '',
-                                    first_driver_guaranteed_addiction_930 = '',
-                                    second_driver_guaranteed_addiction_930 = '',
-                                    num_clients_scenic_float_09 = 0,
-                                    num_guides_scenic_float_09 = 0,
-                                    num_safety_scenic_float_09 = 0,
-                                    num_drivers_scenic_float_09 = 0,
-                                    trip_leader_scenic_float_09 = '',
-                                    second_guide_scenic_float_09 = '',
-                                    third_guide_scenic_float_09 = '',
-                                    fourth_guide_scenic_float_09 = '',
-                                    fifth_guide_scenic_float_09 = '',
-                                    safety_scenic_float_09 = '',
-                                    first_driver_scenic_float_09 = '',
-                                    num_clients_scenic_float_13 = 0,
-                                    num_guides_scenic_float_13 = 0,
-                                    num_safety_scenic_float_13 = 0,
-                                    num_drivers_scenic_float_13 = 0,
-                                    trip_leader_scenic_float_13 = '',
-                                    second_guide_scenic_float_13 = '',
-                                    third_guide_scenic_float_13 = '',
-                                    fourth_guide_scenic_float_13 = '',
-                                    fifth_guide_scenic_float_13 = '',
-                                    safety_scenic_float_13 = '',
-                                    first_driver_scenic_float_13 = '',
-                                    second_driver_scenic_float_13 = '',
-                                    num_clients_overnight_930 = 0,
-                                    num_guides_overnight_930 = 0,
-                                    num_safety_overnight_930 = 0,
-                                    num_drivers_overnight_930 = 0,
-                                    trip_leader_overnight_930 = '',
-                                    second_guide_overnight_930 = '',
-                                    third_guide_overnight_930 = '',
-                                    fourth_guide_overnight_930 = '',
-                                    fifth_guide_overnight_930 = '',
-                                    safety_overnight_930 = '',
-                                    first_driver_overnight_930 = '',
-                                    second_driver_overnight_930 = '')
+                                        _ready_set_go_10_tentative = '',
+                                        _ready_set_go_14_tentative = '',
+                                        _c_wave_10_tentative = '',
+                                        _c_wave_14_tentative = '',
+                                        _guaranteed_addiction_930_tentative = '',
+                                        _scenic_float_09_tentative = '',
+                                        _scenic_float_13_tentative = '',
+                                        num_clients_ready_set_go_10 = 0,
+                                        num_guides_ready_set_go_10 = 0,
+                                        num_safety_ready_set_go_10 = 0,
+                                        num_drivers_ready_set_go_10 = 0,
+                                        trip_leader_ready_set_go_10 = '',
+                                        second_guide_ready_set_go_10 = '',
+                                        third_guide_ready_set_go_10 = '',
+                                        fourth_guide_ready_set_go_10 = '',
+                                        fifth_guide_ready_set_go_10 = '',
+                                        safety_ready_set_go_10 = '',
+                                        first_driver_ready_set_go_10 = '',
+                                        second_driver_ready_set_go_10 = '',
+                                        num_clients_ready_set_go_14 = 0,
+                                        num_guides_ready_set_go_14 = 0,
+                                        num_safety_ready_set_go_14 = 0,
+                                        num_drivers_ready_set_go_14 = 0,
+                                        trip_leader_ready_set_go_14 = '',
+                                        second_guide_ready_set_go_14 = '',
+                                        third_guide_ready_set_go_14 = '',
+                                        fourth_guide_ready_set_go_14 = '',
+                                        fifth_guide_ready_set_go_14 = '',
+                                        safety_ready_set_go_14 = '',
+                                        first_driver_ready_set_go_14 = '',
+                                        second_driver_ready_set_go_14 = '',
+                                        num_clients_c_wave_10 = 0,
+                                        num_guides_c_wave_10 = 0,
+                                        num_safety_c_wave_10 = 0,
+                                        num_drivers_c_wave_10 = 0,
+                                        trip_leader_c_wave_10 = '',
+                                        second_guide_c_wave_10 = '',
+                                        third_guide_c_wave_10 = '',
+                                        fourth_guide_c_wave_10 = '',
+                                        fifth_guide_c_wave_10 = '',
+                                        safety_c_wave_10 = '',
+                                        first_driver_c_wave_10 = '',
+                                        second_driver_c_wave_10 = '',
+                                        num_clients_c_wave_14 = 0,
+                                        num_guides_c_wave_14 = 0,
+                                        num_safety_c_wave_14 = 0,
+                                        num_drivers_c_wave_14 = 0,
+                                        trip_leader_c_wave_14 = '',
+                                        second_guide_c_wave_14 = '',
+                                        third_guide_c_wave_14 = '',
+                                        fourth_guide_c_wave_14 = '',
+                                        fifth_guide_c_wave_14 = '',
+                                        safety_c_wave_14 = '',
+                                        first_driver_c_wave_14 = '',
+                                        second_driver_c_wave_14 = '',
+                                        num_clients_guaranteed_addiction_930 = 0,
+                                        num_guides_guaranteed_addiction_930 = 0,
+                                        num_safety_guaranteed_addiction_930 = 0,
+                                        num_drivers_guaranteed_addiction_930 = 0,
+                                        trip_leader_guaranteed_addiction_930 = '',
+                                        second_guide_guaranteed_addiction_930 = '',
+                                        third_guide_guaranteed_addiction_930 = '',
+                                        fourth_guide_guaranteed_addiction_930 = '',
+                                        fifth_guide_guaranteed_addiction_930 = '',
+                                        safety_guaranteed_addiction_930 = '',
+                                        first_driver_guaranteed_addiction_930 = '',
+                                        second_driver_guaranteed_addiction_930 = '',
+                                        num_clients_scenic_float_09 = 0,
+                                        num_guides_scenic_float_09 = 0,
+                                        num_safety_scenic_float_09 = 0,
+                                        num_drivers_scenic_float_09 = 0,
+                                        trip_leader_scenic_float_09 = '',
+                                        second_guide_scenic_float_09 = '',
+                                        third_guide_scenic_float_09 = '',
+                                        fourth_guide_scenic_float_09 = '',
+                                        fifth_guide_scenic_float_09 = '',
+                                        safety_scenic_float_09 = '',
+                                        first_driver_scenic_float_09 = '',
+                                        num_clients_scenic_float_13 = 0,
+                                        num_guides_scenic_float_13 = 0,
+                                        num_safety_scenic_float_13 = 0,
+                                        num_drivers_scenic_float_13 = 0,
+                                        trip_leader_scenic_float_13 = '',
+                                        second_guide_scenic_float_13 = '',
+                                        third_guide_scenic_float_13 = '',
+                                        fourth_guide_scenic_float_13 = '',
+                                        fifth_guide_scenic_float_13 = '',
+                                        safety_scenic_float_13 = '',
+                                        first_driver_scenic_float_13 = '',
+                                        second_driver_scenic_float_13 = '',
+                                        num_clients_overnight_930 = 0,
+                                        num_guides_overnight_930 = 0,
+                                        num_safety_overnight_930 = 0,
+                                        num_drivers_overnight_930 = 0,
+                                        trip_leader_overnight_930 = '',
+                                        second_guide_overnight_930 = '',
+                                        third_guide_overnight_930 = '',
+                                        fourth_guide_overnight_930 = '',
+                                        fifth_guide_overnight_930 = '',
+                                        safety_overnight_930 = '',
+                                        first_driver_overnight_930 = '',
+                                        second_driver_overnight_930 = '')
 
     session_schedule.add(current_date_object)
     session_schedule.commit()
 
     return current_date_object
+
 
 ################################################################################
 
@@ -375,6 +425,15 @@ def submit_to_database(trip_role_assignment_final, num_drivers, num_clients,
 def copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
                         num_clients, num_guides, max_guides, max_drivers, current_date_object,
                         current_date):
+
+    #latest_day = time.strftime("%d")
+    #latest_month = time.strftime("%m")
+    #latest_year = time.strftime("%Y")
+    #latest_hour = time.strftime("%H")
+    #latest_minute = time.strftime("%M")
+    #latest_second = time.strftime("%S")
+
+    #copyfile('staff.db', 'staff_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
 
     trip_role_assignment_final = {}
     trip_roles_dictionary = {}
@@ -617,48 +676,78 @@ def copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
 
 def create_schedule_day(gui_window, scraper_object, current_date):
 
-    #conn_original_trips = sqlite3.connect('trips.db')
-    #conn_original_staff = sqlite3.connect('staff.db')
-
-    #conn_backup_trips = sqlite3.connect('trips_backup.db')
-    #conn_backup_staff = sqlite3.connect('staff_backup.db')
-
-    #sqlitebck.copy(conn_original_trips, conn_backup_trips)
-    #sqlitebck.copy(conn_original_staff, conn_backup_staff)
-
-    #conn_original_trips.close()
-    #conn_original_staff.close()
-
-    #conn_backup_trips.close()
-    #conn_backup_staff.close()
+    #copyfile('trips.db', 'trips_backup.db')
+    #copyfile('staff.db', 'staff_backup.db')
 
     #try:
-    current_date_object = add_new_date(current_date)
-    temp_guide = 0
-    print("\n")
-    print("Creating Schedule for ", current_date)
-    trips = scraper_object.get_day(current_date)
-    trip_role_assignment = {}
-    class_IV_needed = {}
-    num_clients = {}
-    num_drivers = {}
-    num_guides = {}
-    max_drivers = [0,0,0,0,0,0,0,0]
-    max_guides = [0,0,0,0,0,0,0,0]
 
-    num_safety = 0
+        current_date_object = add_new_date(current_date)
+        temp_guide = 0
+        print("\n")
+        print("Creating Schedule for ", current_date)
+        trips = scraper_object.get_day(current_date)
+        trip_role_assignment = {}
+        class_IV_needed = {}
+        num_clients = {}
+        num_drivers = {}
+        num_guides = {}
+        max_drivers = [0,0,0,0,0,0,0,0]
+        max_guides = [0,0,0,0,0,0,0,0]
 
-    previous_date = schedule_util.calculate_previous_date(current_date)
+        num_safety = 0
 
-    for trip_name in trips:
+        previous_date = schedule_util.calculate_previous_date(current_date)
 
-        print(trips)
+        for trip_name in trips:
 
-        num_clients[trip_name] = int(trips[trip_name])
+            print(trips)
 
-        if trip_name == "Ticket to Ride - 09:30:00":
+            num_clients[trip_name] = int(trips[trip_name])
 
-            if num_clients[trip_name] > 0:
+            if trip_name == "Ticket to Ride - 09:30:00":
+
+                if num_clients[trip_name] > 0:
+
+                    num_guides[trip_name] = int((num_clients[trip_name] // 10)
+                                            +(num_clients[trip_name] % 10 > 0))
+
+                    num_drivers[trip_name] = int((num_clients[trip_name] // 20)
+                                            +(num_clients[trip_name] % 20 > 0))
+
+                    max_guides[
+                        create_schedule.schedule_dictionaries.max_guides_trip_swictch[
+                            trip_name
+                        ]
+                    ] = num_guides[trip_name]
+
+                    max_drivers[
+                        create_schedule.schedule_dictionaries.max_guides_trip_swictch[
+                            trip_name
+                        ]
+                    ] = num_drivers[trip_name]
+
+                    DialogBox = QtWidgets.QDialog()
+                    ui_guides = popups.overnight_popup.Ui_overnight_popup()
+                    ui_guides.setupUi(DialogBox, num_guides[trip_name],
+                                        current_date,
+                                        trip_role_assignment, DialogBox)
+                    DialogBox.show()
+
+                    print("shown")
+
+                    if DialogBox.exec_():
+
+                        print("exec")
+                        trip_role_assignment = ui_guides.return_data()
+
+                        print("trip role assignemt ",trip_role_assignment)
+
+                else:
+
+                    num_guides[trip_name] = 0
+                    num_drivers[trip_name] = 0
+
+            else:
 
                 num_guides[trip_name] = int((num_clients[trip_name] // 10)
                                         +(num_clients[trip_name] % 10 > 0))
@@ -666,220 +755,177 @@ def create_schedule_day(gui_window, scraper_object, current_date):
                 num_drivers[trip_name] = int((num_clients[trip_name] // 20)
                                         +(num_clients[trip_name] % 20 > 0))
 
-                max_guides[
-                    create_schedule.schedule_dictionaries.max_guides_trip_swictch[
-                        trip_name
-                    ]
-                ] = num_guides[trip_name]
+                print("tripname = ", trip_name)
+                print("num_guides= ", num_guides[trip_name])
+                print("num_drivers= ", num_drivers[trip_name])
+                print("max= ", create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name])
 
-                max_drivers[
-                    create_schedule.schedule_dictionaries.max_guides_trip_swictch[
-                        trip_name
-                    ]
-                ] = num_drivers[trip_name]
+                if num_guides[trip_name] > max_guides[create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]]:
 
-                DialogBox = QtGui.QDialog()
-                ui_guides = popups.overnight_popup.Ui_overnight_popup()
-                ui_guides.setupUi(DialogBox, num_guides[trip_name],
-                                    current_date,
-                                    trip_role_assignment, DialogBox)
-                DialogBox.show()
+                    max_guides[
+                        create_schedule.schedule_dictionaries.max_guides_trip_swictch[
+                            trip_name
+                        ]
+                    ] = num_guides[trip_name]
 
-                print("shown")
+                if num_drivers[trip_name] > max_drivers[create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]]:
+                    max_drivers[
+                        create_schedule.schedule_dictionaries.max_guides_trip_swictch[
+                            trip_name
+                        ]
+                    ] = num_drivers[trip_name]
 
-                if DialogBox.exec_():
+                print("\n")
+                print("For: ", trip_name)
+                print ("Number of Clients: ", num_clients[trip_name])
+                print ("Number of Guides Needed: ", num_guides[trip_name])
+                print ("Number of Drivers Needed: ", num_drivers[trip_name])
 
-                    print("exec")
-                    trip_role_assignment = ui_guides.return_data()
+        total_guides_needed = 0
+        total_drivers_needed = 0
 
-                    print("trip role assignemt ",trip_role_assignment)
+        for x in num_guides:
 
-            else:
+            total_guides_needed += num_guides[x]
 
-                num_guides[trip_name] = 0
-                num_drivers[trip_name] = 0
+        for x in num_drivers:
 
-        else:
+            total_drivers_needed += num_drivers[x]
 
-            num_guides[trip_name] = int((num_clients[trip_name] // 10)
-                                    +(num_clients[trip_name] % 10 > 0))
+        if total_guides_needed > len(manage_staff.staff_util.get_total_guides()):
 
-            num_drivers[trip_name] = int((num_clients[trip_name] // 20)
-                                    +(num_clients[trip_name] % 20 > 0))
+            DialogBox = QtWidgets.QDialog()
+            ui_guides = popups.not_enough_guides_popup.Ui_not_enough_guides_popup()
+            ui_guides.setupUi(DialogBox, DialogBox)
+            DialogBox.show()
 
-            print("tripname = ", trip_name)
-            print("num_guides= ", num_guides[trip_name])
-            print("num_drivers= ", num_drivers[trip_name])
-            print("max= ", create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name])
+            print("shown")
 
-            if num_guides[trip_name] > max_guides[create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]]:
+            if DialogBox.exec_():
+                print("exec")
+                temp_guide = ui_guides.return_temp_guide()
 
-                max_guides[
-                    create_schedule.schedule_dictionaries.max_guides_trip_swictch[
-                        trip_name
-                    ]
-                ] = num_guides[trip_name]
+                temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
+                    manage_staff.guide.guide.name.in_(
+                        [temp_guide])).update(
+                            {'in_stream':'true'},synchronize_session=False
+                        )
 
-            if num_drivers[trip_name] > max_drivers[create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]]:
-                max_drivers[
-                    create_schedule.schedule_dictionaries.max_guides_trip_swictch[
-                        trip_name
-                    ]
-                ] = num_drivers[trip_name]
+                session_guide.commit()
 
-            print("\n")
-            print("For: ", trip_name)
-            print ("Number of Clients: ", num_clients[trip_name])
-            print ("Number of Guides Needed: ", num_guides[trip_name])
-            print ("Number of Drivers Needed: ", num_drivers[trip_name])
+                print("Set to true : ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
 
-    total_guides_needed = 0
-    total_drivers_needed = 0
+        #if total_drivers_needed > len(manage_staff.staff_util.get_total_drivers()):
+    #
+    #        DialogBox = QtGui.QDialog()
+    #        ui_guides = popups.not_enough_guides_popup.Ui_not_enough_guides_popup()
+    #        ui_guides.setupUi(DialogBox, DialogBox)
+    #        DialogBox.show()
+    #
+    #        print("shown")
+    #
+    #        if DialogBox.exec_():
+    #            print("exec")
+    #            temp_guide = ui_guides.return_temp_guide()
+    #
+    #            temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
+    #                manage_staff.guide.guide.name.in_(
+    #                    [temp_guide])).update(
+    #                        {'in_stream':'true'},synchronize_session=False
+    #                    )
+    #
+    #            session_guide.commit()
+    #
+    #            print("Set to true : ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
 
-    for x in num_guides:
+        for trip in create_schedule.schedule_dictionaries.trip_number_switch:
 
-        total_guides_needed += num_guides[x]
+            if trip not in num_clients:
 
-    for x in num_drivers:
+                num_clients[trip] = 0
+                num_guides[trip] = 0
+                num_drivers[trip] = 0
 
-        total_drivers_needed += num_drivers[x]
+                print("\n")
+                print("For: ", trip_name)
+                print ("Number of Clients: ", num_clients)
+                print ("Number of Guides Needed: ", num_guides)
+                print ("Number of Drivers Needed: ", num_drivers)
 
-    if total_guides_needed > len(manage_staff.staff_util.get_total_guides()):
+        for trip in range(len(create_schedule.schedule_dictionaries.trip_types)):
 
-        DialogBox = QtGui.QDialog()
-        ui_guides = popups.not_enough_guides_popup.Ui_not_enough_guides_popup()
-        ui_guides.setupUi(DialogBox, DialogBox)
-        DialogBox.show()
+            if trip != 4:
 
-        print("shown")
+                print("max_guides: ", max_guides[trip])
 
-        if DialogBox.exec_():
-            print("exec")
-            temp_guide = ui_guides.return_temp_guide()
+                if (max_guides[trip] <= 4 and max_guides[trip] > 1 ):
+
+                    for role_needed in range(max_guides[trip]):
+
+                        print("Num guides needed", max_guides[trip], "for ", trip)
+
+                        create_schedule_role(role_needed, current_date, trip_role_assignment, trip, class_IV_needed)
+
+
+                elif(max_guides[trip] == 1):
+
+                    create_schedule_role(0, current_date, trip_role_assignment, trip, class_IV_needed)
+                    create_schedule_role(4, current_date, trip_role_assignment, trip, class_IV_needed)
+
+                #class_IV_drivers = get_class_IV_drivers()
+                #if total_drivers_needed <= class_IV_drivers:
+                #print("max_drivers: ", max_drivers[trip])
+
+                for role_needed in range(max_drivers[trip]):
+
+                    print("Num drivers needed ", max_drivers[trip], "for ", trip)
+
+                    create_schedule_role(role_needed+5, current_date, trip_role_assignment, trip, class_IV_needed)
+
+        #print(trips)
+        #print(num_guides)
+        #print('trip role assignment: ', trip_role_assignment)
+        print("CLASS IV NEEDED: ", class_IV_needed)
+
+        copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
+                            num_clients, num_guides,
+                            max_guides, max_drivers, current_date_object, current_date)
+
+        if temp_guide != 0:
 
             temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
-                manage_staff.guide.guide.name.in_(
-                    [temp_guide])).update(
-                        {'in_stream':'true'},synchronize_session=False
-                    )
+                                    manage_staff.guide.guide.name.in_(
+                                        [temp_guide])).update(
+                                            {'in_stream':'false'},synchronize_session=False
+                                        )
 
             session_guide.commit()
 
-            print("Set to true : ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
-
-    #if total_drivers_needed > len(manage_staff.staff_util.get_total_drivers()):
-#
-#        DialogBox = QtGui.QDialog()
-#        ui_guides = popups.not_enough_guides_popup.Ui_not_enough_guides_popup()
-#        ui_guides.setupUi(DialogBox, DialogBox)
-#        DialogBox.show()
-#
-#        print("shown")
-#
-#        if DialogBox.exec_():
-#            print("exec")
-#            temp_guide = ui_guides.return_temp_guide()
-#
-#            temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
-#                manage_staff.guide.guide.name.in_(
-#                    [temp_guide])).update(
-#                        {'in_stream':'true'},synchronize_session=False
-#                    )
-#
-#            session_guide.commit()
-#
-#            print("Set to true : ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
-
-    for trip in create_schedule.schedule_dictionaries.trip_number_switch:
-
-        if trip not in num_clients:
-
-            num_clients[trip] = 0
-            num_guides[trip] = 0
-            num_drivers[trip] = 0
-
-            print("\n")
-            print("For: ", trip_name)
-            print ("Number of Clients: ", num_clients)
-            print ("Number of Guides Needed: ", num_guides)
-            print ("Number of Drivers Needed: ", num_drivers)
-
-    for trip in range(len(create_schedule.schedule_dictionaries.trip_types)):
-
-        if trip != 4:
-
-            print("max_guides: ", max_guides[trip])
-
-            if (max_guides[trip] <= 4 and max_guides[trip] > 1 ):
-
-                for role_needed in range(max_guides[trip]):
-
-                    print("Num guides needed", max_guides[trip], "for ", trip)
-
-                    create_schedule_role(role_needed, current_date, trip_role_assignment, trip, class_IV_needed)
+            print("returned to false: ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
 
 
-            elif(max_guides[trip] == 1):
-
-                create_schedule_role(0, current_date, trip_role_assignment, trip, class_IV_needed)
-                create_schedule_role(4, current_date, trip_role_assignment, trip, class_IV_needed)
-
-            #class_IV_drivers = get_class_IV_drivers()
-            #if total_drivers_needed <= class_IV_drivers:
-            #print("max_drivers: ", max_drivers[trip])
-
-            #for role_needed in range(max_drivers[trip]):
-
-                #print("Num drivers needed ", max_drivers[trip], "for ", trip)
-
-                #create_schedule_role(role_needed+5, current_date, trip_role_assignment, trip, class_IV_needed)
-
-    #print(trips)
-    #print(num_guides)
-    #print('trip role assignment: ', trip_role_assignment)
-    print("CLASS IV NEEDED: ", class_IV_needed)
-
-    copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
-                        num_clients, num_guides,
-                        max_guides, max_drivers, current_date_object, current_date)
-
-    if temp_guide != 0:
-
-        temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
-                                manage_staff.guide.guide.name.in_(
-                                    [temp_guide])).update(
-                                        {'in_stream':'false'},synchronize_session=False
-                                    )
-
-        session_guide.commit()
-
-        print("returned to false: ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
-
-
-        #if temp_driver != 0:
-    #
-    #        temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
-    #                                manage_staff.guide.guide.name.in_(
-    #                                    [temp_guide])).update(
-    #                                        {'in_stream':'false'},synchronize_session=False
-    #                                    )
-    #
-    #        session_guide.commit()
-    #
-    #        print("returned to false: ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
+            #if temp_driver != 0:
+        #
+        #        temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
+        #                                manage_staff.guide.guide.name.in_(
+        #                                    [temp_guide])).update(
+        #                                        {'in_stream':'false'},synchronize_session=False
+        #                                    )
+        #
+        #        session_guide.commit()
+        #
+        #        print("returned to false: ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
+        #os.remove('trips_backup.db')
+        #os.remove('staff_backup.db')
 
     #except:
 
-        #e = sys.exc_info()[0]
-        #print("ERROR, ERROR, ERROR, ", e)
-        #conn_original_trips = sqlite3.connect('///trips.db')
-        #conn_original_staff = sqlite3.connect('///staff.db')
+        #print("ERROR OCCURRED")
 
-        #conn_backup_trips = sqlite3.connect('///trips_backup.db')
-        #conn_backup_staff = sqlite3.connect('///staff_backup.db')
-
-        #sqlitebck.copy(conn_backup_trips, conn_original_trips)
-        #sqlitebck.copy(conn_backup_staff, conn_original_staff)
+        #copyfile('trips_backup.db', 'trips.db')
+        #copyfile('staff_backup.db', 'staff.db')
+        #os.remove('trips_backup.db')
+        #os.remove('staff_backup.db')
 
 
 
@@ -889,7 +935,7 @@ def create_schedule_day(gui_window, scraper_object, current_date):
 def create_schedule_role(role, current_date, trip_role_assignment, trip, class_IV_needed):
 
 
-    calculate_priority_list = get_priority.get_ordered_priority_list(trip, role)
+    calculate_priority_list = get_priority.get_ordered_priority_list(trip, role, class_IV_needed)
 
 
 
@@ -927,7 +973,6 @@ def create_schedule_role(role, current_date, trip_role_assignment, trip, class_I
 
             for candidate in loop_controller:
 
-                #print(current_date_schedule_list)
                 staff_member = current_date_schedule_list[0][
                             create_schedule.schedule_dictionaries.role_switch[roles]
                             +create_schedule.schedule_dictionaries.trip_switch_numerical[trips]
@@ -952,15 +997,15 @@ def create_schedule_role(role, current_date, trip_role_assignment, trip, class_I
         if role <= 4:
             candidate_object = session_guide.query(manage_staff.guide.guide).filter(
                                     manage_staff.guide.guide.name == calculate_priority_list[0]
-                                    )
+                               )
             candidate_list = [u.__dict__ for u in candidate_object.all()]
             print("CANDIDATE IS GUIDE")
             print(calculate_priority_list[0], candidate_list)
 
         else:
             candidate_object = session_driver.query(manage_staff.driver.driver).filter(
-                                manage_staff.driver.driver.name.in_(
-                                calculate_priority_list[0]))
+                                manage_staff.driver.driver.name == calculate_priority_list[0]
+                               )
 
             candidate_list = [u.__dict__ for u in candidate_object.all()]
             print("CANDIDATE IS DRIVER");
@@ -975,7 +1020,7 @@ def create_schedule_role(role, current_date, trip_role_assignment, trip, class_I
         else:
             print("HAS CLASS IV: ", candidate_list[0]['has_class_IV'])
             if (create_schedule.schedule_dictionaries.trip_types[trip]
-            not in  class_IV_needed):
+                    not in  class_IV_needed):
                 print("NO ENTRY FOR THIS TRIP YET")
                 class_IV_needed[
                     create_schedule.schedule_dictionaries.trip_types[trip]
