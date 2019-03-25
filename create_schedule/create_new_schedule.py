@@ -23,6 +23,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import load_only
 
 from shutil import copyfile
+import datetime
 import time
 
 import sys
@@ -151,15 +152,6 @@ class schedule(schedule_base):
 ################################################################################
 
 def add_new_date(current_date):
-
-    #latest_day = time.strftime("%d")
-    #latest_month = time.strftime("%m")
-    #latest_year = time.strftime("%Y")
-    #latest_hour = time.strftime("%H")
-    #latest_minute = time.strftime("%M")
-    #latest_second = time.strftime("%S")
-
-    #copyfile('trips.db', 'trips_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
 
     schedule_object = session_schedule.query(schedule).filter(
                             schedule.date == current_date)
@@ -426,15 +418,6 @@ def copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
                         num_clients, num_guides, max_guides, max_drivers, current_date_object,
                         current_date):
 
-    #latest_day = time.strftime("%d")
-    #latest_month = time.strftime("%m")
-    #latest_year = time.strftime("%Y")
-    #latest_hour = time.strftime("%H")
-    #latest_minute = time.strftime("%M")
-    #latest_second = time.strftime("%S")
-
-    #copyfile('staff.db', 'staff_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
-
     trip_role_assignment_final = {}
     trip_roles_dictionary = {}
 
@@ -680,6 +663,12 @@ def create_schedule_day(gui_window, scraper_object, current_date):
     #copyfile('staff.db', 'staff_backup.db')
 
     #try:
+        day_of_week = int(datetime.datetime.strptime(current_date, '%Y-%m-%d').strftime('%w'))
+        print("DAY OF WEEK: ", day_of_week)
+
+        if day_of_week == 0:
+            print("MAKING SCHEDULE FOR MONDAY")
+            manage_staff.staff_util.reset_this_period()
 
         current_date_object = add_new_date(current_date)
         temp_guide = 0
@@ -915,6 +904,8 @@ def create_schedule_day(gui_window, scraper_object, current_date):
         #        session_guide.commit()
         #
         #        print("returned to false: ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
+
+
         #os.remove('trips_backup.db')
         #os.remove('staff_backup.db')
 
@@ -1000,7 +991,6 @@ def create_schedule_role(role, current_date, trip_role_assignment, trip, class_I
                                )
             candidate_list = [u.__dict__ for u in candidate_object.all()]
             print("CANDIDATE IS GUIDE")
-            print(calculate_priority_list[0], candidate_list)
 
         else:
             candidate_object = session_driver.query(manage_staff.driver.driver).filter(
@@ -1027,7 +1017,6 @@ def create_schedule_role(role, current_date, trip_role_assignment, trip, class_I
                 ] = 0;
                 print("CLASS IV NEEDED: ", class_IV_needed)
 
-#def trips_with_class_IV_list():
 
     #else:
         #trip_role_assignment[create_schedule.schedule_dictionaries.role_switch[role]+create_schedule.schedule_dictionaries.trip_types[trip]] = "No Guides Left"

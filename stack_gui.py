@@ -17,7 +17,7 @@ import manage_staff
 
 from create_schedule import create_new_schedule
 
-from shutil import copyfile
+from shutil import copy2
 import time
 
 session_guide = manage_staff.guide.guide_session()
@@ -1377,18 +1377,13 @@ class Ui_Form(object):
             self.tableWidget_2.setHorizontalHeaderItem(column, QtWidgets.QTableWidgetItem(column_label[column]))
 
         while date != end_date:
-            print(date)
-
 
             for row in range(0, 56, 8):
 
                 self.tableWidget_2.setItem(row, column_number, QtWidgets.QTableWidgetItem(""))
-                print(row)
                 for trip_num in range(1,8):
                     c_trips.execute("SELECT "+create_schedule.schedule_dictionaries.role_switch[trip_num-1]+create_schedule.schedule_dictionaries.trip_switch_numerical[row/8]+" FROM schedule WHERE date =  ?",(date,))
                     result = c_trips.fetchone()
-                    print(row+trip_num)
-
 
                     if result[0] is not None:
                         self.tableWidget_2.setItem(row+trip_num, column_number, QtWidgets.QTableWidgetItem(str(result[0])))
@@ -1415,8 +1410,8 @@ class Ui_Form(object):
         latest_minute = time.strftime("%M")
         latest_second = time.strftime("%S")
 
-        copyfile('trips.db', 'trips_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
-        copyfile('staff.db', 'staff_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
+        copy2('trips.db', './database_backups/trips/trips_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
+        copy2('staff.db', './database_backups/staff/staff_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
 
         for x in range(0, num_days):
             create_schedule.create_new_schedule.create_schedule_day(self, excel_data, date)

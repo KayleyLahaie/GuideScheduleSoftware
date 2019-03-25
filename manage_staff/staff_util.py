@@ -18,7 +18,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import sessionmaker
-
 from sqlalchemy.orm import load_only
 
 import create_schedule
@@ -153,6 +152,49 @@ def update_num_trips_driver(driver_name, trip_name, priority_change):
                             +priority_change},synchronize_session=False)
 
     session_driver.commit()
+
+################################################################################
+
+def reset_this_period():
+
+    all_drivers = get_total_drivers()
+    all_guides = get_total_guides()
+
+    #print("RESETING DRIVERS")
+
+    for driver in all_drivers:
+        #print("DRIVER: ", driver['name'])
+
+        for trip in create_schedule.schedule_dictionaries.trip_types:
+            #print("TRIP: ", trip)
+
+            num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
+                                manage_staff.driver.driver.name == driver['name']).update(
+                                    {"driven_"
+                                    +create_schedule.schedule_dictionaries.time_types[1]
+                                    +create_schedule.schedule_dictionaries.trip_types[trip]:0
+                                    },synchronize_session=False)
+
+            session_driver.commit()
+
+    #print("RESETING GUIDES")
+    for guide in all_guides:
+        #print("GUIDE: ", guide)
+
+        for trip in create_schedule.schedule_dictionaries.trip_types:
+            #print("TRIP: ", trip)
+
+            for role in create_schedule.schedule_dictionaries.guide_roles:
+                #print("ROLE: ", role)
+
+                num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
+                                    manage_staff.guide.guide.name == guide['name']).update(
+                                        {create_schedule.schedule_dictionaries.guide_roles[role]
+                                        +create_schedule.schedule_dictionaries.time_types[1]
+                                        +create_schedule.schedule_dictionaries.trip_types[trip]:0
+                                        },synchronize_session=False)
+
+                session_guide.commit()
 
 ################################################################################
 
