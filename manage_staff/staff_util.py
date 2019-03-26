@@ -198,7 +198,6 @@ def reset_this_period():
 
 ################################################################################
 
-
 def get_total_guides():
 
     all_guides_object = session_guide.query(manage_staff.guide.guide).filter(
@@ -209,7 +208,6 @@ def get_total_guides():
     return all_guides_list
 
 ################################################################################
-
 
 def get_total_temp_guides():
 

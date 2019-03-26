@@ -1414,7 +1414,7 @@ class Ui_Form(object):
         copy2('staff.db', './database_backups/staff/staff_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
 
         for x in range(0, num_days):
-            create_schedule.create_new_schedule.create_schedule_day(self, excel_data, date)
+            create_schedule.create_schedule_day.create_schedule_day(self, excel_data, date)
             date = create_schedule.schedule_util.calculate_next_date(date)
 
         self.load_schedule_data(excel_data.get_first_date(), create_schedule.schedule_util.calculate_previous_date(date))
