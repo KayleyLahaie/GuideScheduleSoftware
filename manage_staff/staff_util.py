@@ -23,6 +23,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import load_only
 
 import create_schedule
+from create_schedule import create_new_schedule
 
 import manage_staff
 from manage_staff import guide
@@ -30,6 +31,7 @@ from manage_staff import driver
 
 session_guide = guide.guide_session()
 session_driver = driver.driver_session()
+session_schedule = create_new_schedule.schedule_session()
 
 ################################################################################
 
@@ -83,14 +85,22 @@ def update_num_trips_guide(guide_name, trip_name, priority_change, role, date_to
 
         period_to_be_updated = create_schedule.schedule_util.get_current_period(date_to_be_updated)
         print("PERIOD TO BE UPDATE: ", period_to_be_updated)
-        period_object = session_schedule.query(
-                            func.max(
-                                create_schedule.create_new_schedule.schedule.period
-                                )
-                            )
+        period_object = session_schedule.query(create_schedule.create_new_schedule.schedule).options(
+                            load_only('period')
+                        )
+
+        print("PERIOD OBJECT: ", period_object)
         period_list = [u.__dict__ for u in period_object.all()]
         print("PERIOD LIST: ", period_list)
-        if period_to_be_updated == period_list['period']:
+        period_max = 0
+        for period in period_list:
+            if period['period'] > period_max:
+                period_max = period['period']
+
+        print("PERIOD MAX: ", period_max)
+        if period_to_be_updated == period_max:
+
+            print("PERIOD TO BE UPDATED: ",period_to_be_updated)
 
             num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
                                 manage_staff.guide.guide.name.in_(
@@ -144,15 +154,21 @@ def update_num_trips_driver(driver_name, trip_name, priority_change, date_to_be_
     session_driver.commit()
 
     period_to_be_updated = create_schedule.schedule_util.get_current_period(date_to_be_updated)
-    print("PERIOD TO BE UPDATE: ", period_to_be_updated)
-    period_object = session_schedule.query(
-                        func.max(
-                            create_schedule.create_new_schedule.schedule.period
-                            )
-                        )
+    print("PERIOD TO BE UPDATE DRIVER: ", period_to_be_updated)
+    period_object = session_schedule.query(create_schedule.create_new_schedule.schedule).options(
+                        load_only('period')
+                    )
+
+    print("PERIOD OBJECT DRIVER: ", period_object)
     period_list = [u.__dict__ for u in period_object.all()]
-    print("PERIOD LIST: ", period_list)
-    if period_to_be_updated == period_list['period']:
+    print("PERIOD LIST DRIVER: ", period_list)
+    period_max = 0
+    for period in period_list:
+        if period['period'] > period_max:
+            period_max = period['period']
+
+    print("PERIOD MAX DRIVER: ", period_max)
+    if period_to_be_updated == period_max:
 
         num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
                                 manage_staff.driver.driver.name.in_([driver_name])).options(

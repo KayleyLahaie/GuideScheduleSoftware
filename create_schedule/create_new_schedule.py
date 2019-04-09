@@ -158,13 +158,14 @@ def add_new_date(current_date):
                                                     staff_member,
                                                     create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip],
                                                     -1,
-                                                    create_schedule.schedule_dictionaries.guide_roles_converter[role]
+                                                    create_schedule.schedule_dictionaries.guide_roles_converter[role],
+                                                    current_date
                                                 )
                     else:
                         manage_staff.staff_util.update_num_trips_driver(
                                                     staff_member,
                                                     create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip],
-                                                    -1)
+                                                    -1, current_date)
 
         session_schedule.query(schedule).filter(
                     schedule.date == current_date
