@@ -61,7 +61,8 @@ def copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
                                     +create_schedule.schedule_dictionaries.trip_types[
                                         create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]]],
                                 create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name],
-                                1, create_schedule.schedule_dictionaries.role_update_switch[role]
+                                1, create_schedule.schedule_dictionaries.role_update_switch[role],
+                                current_date
                             )
 
                         else:
@@ -71,7 +72,7 @@ def copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
                                     +create_schedule.schedule_dictionaries.trip_types[
                                         create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]]],
                                 create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name],
-                                1
+                                1, current_date
                             )
 
                     else:
@@ -120,7 +121,8 @@ def copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
                             ],
                             create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name],
                             1,
-                            create_schedule.schedule_dictionaries.role_update_switch[role]
+                            create_schedule.schedule_dictionaries.role_update_switch[role],
+                            current_date
                         )
 
                     for role in range(num_guides[trip_name], 7):
@@ -171,7 +173,8 @@ def copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
                         ],
                         create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name],
                         1,
-                        create_schedule.schedule_dictionaries.role_update_switch[0]
+                        create_schedule.schedule_dictionaries.role_update_switch[0],
+                        current_date
                     )
 
                     if(max_guides[create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]] > 1):
@@ -201,7 +204,8 @@ def copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
                             ],
                             create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name],
                             1,
-                            create_schedule.schedule_dictionaries.role_update_switch[4]
+                            create_schedule.schedule_dictionaries.role_update_switch[4],
+                            current_date
                         )
 
                     else:
@@ -235,7 +239,8 @@ def copy_schedule_role(trips, trip_role_assignment, num_drivers, num_safety,
                                 ]+str(4)],
                                 create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name],
                                 1,
-                                create_schedule.schedule_dictionaries.role_update_switch[4]
+                                create_schedule.schedule_dictionaries.role_update_switch[4],
+                                current_date
                             )
 
     print(trip_role_assignment_final)

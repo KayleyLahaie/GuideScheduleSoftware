@@ -31,6 +31,7 @@ class schedule(schedule_base):
 
     __tablename__ = 'schedule'
     date = Column(String, primary_key=True)
+    period = Column(Integer)
     _ready_set_go_10_tentative = Column(String)
     _ready_set_go_14_tentative = Column(String)
     _c_wave_10_tentative = Column(String)
@@ -174,6 +175,7 @@ def add_new_date(current_date):
 
 
     current_date_object = schedule( date = current_date,
+                                        period = 0,
                                         _ready_set_go_10_tentative = '',
                                         _ready_set_go_14_tentative = '',
                                         _c_wave_10_tentative = '',
@@ -288,6 +290,7 @@ def submit_to_database(trip_role_assignment_final, num_drivers, num_clients,
                        current_date):
 
     current_date_object.date = current_date
+    current_date_object.period = schedule_util.get_current_period(current_date)
     current_date_object._ready_set_go_10_tentative = ''
     current_date_object._ready_set_go_14_tentative = ''
     current_date_object._c_wave_10_tentative = ''

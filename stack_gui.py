@@ -1086,10 +1086,14 @@ class Ui_Form(object):
         else:
             priority_overnight = int(self.priority_value__overnight.toPlainText())
 
-        latest_date = time.strftime("%x")
-        latest_time = time.strftime("%X")
+        latest_day = time.strftime("%d")
+        latest_month = time.strftime("%m")
+        latest_year = time.strftime("%Y")
+        latest_hour = time.strftime("%H")
+        latest_minute = time.strftime("%M")
+        latest_second = time.strftime("%S")
 
-        copyfile('staff.db', 'staff_'+latest_date+' '+latest_time+'.db')
+        copy2('staff.db', './database_backups/staff/staff_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
 
         new_guide = manage_staff.guide.guide(   name = name, in_stream = 'true', has_class_IV = has_class_IV,
                                                 tl_four_hour = four_hour, tl_c_wave = c_wave, tl_full_day = full_day,
@@ -1177,10 +1181,14 @@ class Ui_Form(object):
             seniority_overnight = 0
 
 
-        latest_date = time.strftime("%x")
-        latest_time = time.strftime("%X")
+        latest_day = time.strftime("%d")
+        latest_month = time.strftime("%m")
+        latest_year = time.strftime("%Y")
+        latest_hour = time.strftime("%H")
+        latest_minute = time.strftime("%M")
+        latest_second = time.strftime("%S")
 
-        copyfile('staff.db', 'staff_'+latest_date+' '+latest_time+'.db')
+        copy2('staff.db', './database_backups/staff/staff_'+latest_day+'_'+latest_month+'_'+latest_year+'_'+latest_hour+'_'+latest_minute+'_'+latest_second+'_'+'.db')
 
 
         new_driver = manage_staff.driver.driver(    name = name, in_stream = 'true',

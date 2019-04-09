@@ -18,32 +18,29 @@ def create_schedule_role(role, current_date, trip_role_assignment, trip, class_I
                                 trips_needing_class_IV_guide
                             )
 
-    current_date_schedule = session_schedule.query(create_new_schedule.schedule).filter(
-                                create_new_schedule.schedule.date == current_date
-                            )
-
-    current_date_schedule_list = [u.__dict__ for u in current_date_schedule.all()]
-
     class_IV_candidate_object = session_guide.query(manage_staff.guide.guide).filter(
                             manage_staff.guide.guide.has_class_IV == '1'
                        )
 
     class_IV_candidate_list = [u.__dict__ for u in class_IV_candidate_object.all()]
-
+    print("TRIPS NEEDING CLASS IV GUIDE IS: ", trips_needing_class_IV_guide)
+    print("ROLE IS: ", role)
     if role <= 4:
         if trips_needing_class_IV_guide > 0:
-
+            print("TRIP ROLE ASSIGNMENT: ", trip_role_assignment)
             staff = []
             class_IV = 0
 
             print("CANDIDATE LIST- CREATE SCHEDULE ROLE: ", class_IV_candidate_list)
 
             for role_staff in create_schedule.schedule_dictionaries.role_switch:
-
-                staff.append(current_date_schedule_list[0][
-                        create_schedule.schedule_dictionaries.role_switch[role_staff]
-                        +create_schedule.schedule_dictionaries.trip_switch_numerical[trip]
-                        ])
+                if (create_schedule.schedule_dictionaries.role_switch[role_staff]
+                        +create_schedule.schedule_dictionaries.trip_types[trip]
+                        in trip_role_assignment):
+                    staff.append(trip_role_assignment[
+                            create_schedule.schedule_dictionaries.role_switch[role_staff]
+                            +create_schedule.schedule_dictionaries.trip_types[trip]
+                            ])
 
             if staff:
                 for guide in staff:
@@ -54,12 +51,19 @@ def create_schedule_role(role, current_date, trip_role_assignment, trip, class_I
                             class_IV = 1
 
             if class_IV == 1:
-                calculate_priority_list = get_priority.calculate_priority(calculate_priority_list)
+                calculate_priority_list = get_priority.calculate_priority_class_IV(calculate_priority_list)
 
     #print("***", current_date_schedule_list)
     #print('choosing ', role,' for ', trip)
 
     loop_controller = calculate_priority_list.copy()
+
+    current_date_schedule = session_schedule.query(create_new_schedule.schedule).filter(
+                                create_new_schedule.schedule.date == current_date
+                            )
+
+    current_date_schedule_list = [u.__dict__ for u in current_date_schedule.all()]
+
 
     for candidate in loop_controller:
 
@@ -124,7 +128,7 @@ def create_schedule_role(role, current_date, trip_role_assignment, trip, class_I
 
             candidate_list = [u.__dict__ for u in candidate_object.all()]
             print("CANDIDATE IS DRIVER");
-        print("CANDIDATE LIST: ", candidate_list)
+
         if  candidate_list[0]['has_class_IV'] == '1':
             #print("HAS CLASS IV: ", candidate_list[0]['has_class_IV'])
             class_IV_needed[
@@ -142,7 +146,7 @@ def create_schedule_role(role, current_date, trip_role_assignment, trip, class_I
                 ] = 0;
                 #print("CLASS IV NEEDED: ", class_IV_needed)
 
-
+    return trips_needing_class_IV_guide
     #else:
         #trip_role_assignment[create_schedule.schedule_dictionaries.role_switch[role]+create_schedule.schedule_dictionaries.trip_types[trip]] = "No Guides Left"
 #schedule_update = session_schedule.query(schedule).update({create_schedule.schedule_dictionaries.role_switch[role]+create_schedule.schedule_dictionaries.trip_switch_numerical[trip]:calculated_priority_list[0]},synchronize_session=False)

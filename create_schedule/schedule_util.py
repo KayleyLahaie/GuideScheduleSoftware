@@ -1,3 +1,5 @@
+import datetime
+
 ################################################################################
 
 def calculate_previous_date(current_date):
@@ -33,3 +35,13 @@ def calculate_next_date(previous_date):
 
 
 ################################################################################
+def get_current_period(current_date):
+
+    print("CURRENT DATE - GET CURRENT PERIOD: ", current_date)
+    season_start_date_object =  datetime.date(datetime.datetime.now().year, 5, 15)
+    current_date_object = datetime.date(int(current_date[0:3]), int(current_date[5:6]), int(current_date[8:9]))
+    difference = current_date_object - season_start_date_object
+
+    current_period = ceil(difference.days/7)
+    print("CURRENT PERIOT - GET CURRENT PERIOD: ", current_period)
+    return current_period

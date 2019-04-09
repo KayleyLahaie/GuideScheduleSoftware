@@ -356,7 +356,9 @@ def calculate_priority(driver_priority_matrix, driver_ordered_name, driver_order
         return calculated_priority_drivers
 
 
-def calculate_priority(guides_ordered_name):
+def calculate_priority_class_IV(guides_ordered_name):
+
+    temp_guides_ordered_name = guides_ordered_name.copy()
 
     candidate_object = session_guide.query(manage_staff.guide.guide).filter(
                             manage_staff.guide.guide.has_class_IV == '1'
@@ -367,11 +369,16 @@ def calculate_priority(guides_ordered_name):
     for guide in guides_ordered_name:
         print("GUIDE: ", guide)
         for candidate in candidate_list:
+            print("CANDIDATE: ", candidate['name'])
             if guide == candidate['name']:
                 print(guide," == ",candidate['name'])
-                guides_ordered_name.remove(guide)
-                guides_ordered_name.append(guide)
-                print("NEW GUIDES ORDERED NAME: ", guides_ordered_name)
+                temp_guides_ordered_name.remove(guide)
+                temp_guides_ordered_name.append(guide)
+                print("NEW GUIDES ORDERED NAME: ", temp_guides_ordered_name)
+                break
+    guides_ordered_name = temp_guides_ordered_name
+
+    return guides_ordered_name
 ################################################################################
 
 def get_driver_priority_matrix():

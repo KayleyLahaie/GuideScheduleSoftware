@@ -7,6 +7,8 @@ from create_schedule import get_priority
 
 import manage_staff
 from manage_staff import staff_util
+from manage_staff import guide
+from manage_staff import driver
 
 import popups
 from popups import not_enough_guides_popup
@@ -16,6 +18,9 @@ import os
 import datetime
 from PySide2 import QtCore, QtGui, QtWidgets
 from shutil import copyfile
+
+session_guide = guide.guide_session()
+session_driver = driver.driver_session()
 
 def create_schedule_day(gui_window, scraper_object, current_date):
 
@@ -207,7 +212,7 @@ def create_schedule_day(gui_window, scraper_object, current_date):
                 print ("Number of Drivers Needed: ", num_drivers)
 
 
-        num_class_IV_drivers = total_guides_needed
+        num_class_IV_drivers = total_drivers_needed
         print("NUM CLASS IV DRIVERS NEEDED: ", num_class_IV_drivers)
 
         total_drivers = manage_staff.staff_util.get_total_drivers()
@@ -229,18 +234,18 @@ def create_schedule_day(gui_window, scraper_object, current_date):
                 if (max_guides[trip] <= 4 and max_guides[trip] > 1 ):
                     for role_needed in range(max_guides[trip]):
                         print("Num guides needed", max_guides[trip], "for ", trip)
-                        create_schedule_role.create_schedule_role(role_needed, current_date, trip_role_assignment, trip, class_IV_needed, trips_needing_class_IV_guide)
+                        trips_needing_class_IV_guide = create_schedule_role.create_schedule_role(role_needed, current_date, trip_role_assignment, trip, class_IV_needed, trips_needing_class_IV_guide)
 
                 elif(max_guides[trip] == 1):
 
-                    create_schedule_role.create_schedule_role(0, current_date, trip_role_assignment, trip, class_IV_needed, trips_needing_class_IV_guide)
-                    create_schedule_role.create_schedule_role(4, current_date, trip_role_assignment, trip, class_IV_needed, trips_needing_class_IV_guide)
+                    trips_needing_class_IV_guide = create_schedule_role.create_schedule_role(0, current_date, trip_role_assignment, trip, class_IV_needed, trips_needing_class_IV_guide)
+                    trips_needing_class_IV_guide = create_schedule_role.create_schedule_role(4, current_date, trip_role_assignment, trip, class_IV_needed, trips_needing_class_IV_guide)
 
                 for role_needed in range(max_drivers[trip]):
 
                     print("Num drivers needed ", max_drivers[trip], "for ", trip)
 
-                    create_schedule_role.create_schedule_role(role_needed+5, current_date, trip_role_assignment, trip, class_IV_needed, trips_needing_class_IV_guide)
+                    trips_needing_class_IV_guide = create_schedule_role.create_schedule_role(role_needed+5, current_date, trip_role_assignment, trip, class_IV_needed, trips_needing_class_IV_guide)
 
         #print(trips)
         #print(num_guides)

@@ -1,3 +1,4 @@
+from sqlalchemy.sql.expression import func
 
 #def last_day_worked(staff_name, trip_name, current_date):
 #
@@ -14,6 +15,7 @@
 #            previous_date = calculate_previous_date(previous_date)
 #            x+=1
 #    return ""
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String
@@ -54,7 +56,7 @@ def is_day_off(guide_name, current_date):
 ################################################################################
 
 
-def update_num_trips_guide(guide_name, trip_name, priority_change, role):
+def update_num_trips_guide(guide_name, trip_name, priority_change, role, date_to_be_updated):
 
     if guide_name != 'No Guides Left':
         num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
@@ -79,32 +81,43 @@ def update_num_trips_guide(guide_name, trip_name, priority_change, role):
                                 +priority_change},synchronize_session=False)
         session_guide.commit()
 
-        num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
-                            manage_staff.guide.guide.name.in_(
-                            [guide_name])).options(load_only(
-                                create_schedule.schedule_dictionaries.guide_roles[role]
-                                +create_schedule.schedule_dictionaries.time_types[1]
-                                +create_schedule.schedule_dictionaries.trip_types[trip_name]))
+        period_to_be_updated = create_schedule.schedule_util.get_current_period(date_to_be_updated)
+        print("PERIOD TO BE UPDATE: ", period_to_be_updated)
+        period_object = session_schedule.query(
+                            func.max(
+                                create_schedule.create_new_schedule.schedule.period
+                                )
+                            )
+        period_list = [u.__dict__ for u in period_object.all()]
+        print("PERIOD LIST: ", period_list)
+        if period_to_be_updated == period_list['period']:
 
-        num_trips_list = [u.__dict__ for u in num_trips_object.all()]
+            num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
+                                manage_staff.guide.guide.name.in_(
+                                [guide_name])).options(load_only(
+                                    create_schedule.schedule_dictionaries.guide_roles[role]
+                                    +create_schedule.schedule_dictionaries.time_types[1]
+                                    +create_schedule.schedule_dictionaries.trip_types[trip_name]))
 
-        num_trips = num_trips_list[0][create_schedule.schedule_dictionaries.guide_roles[role]
-                    +create_schedule.schedule_dictionaries.time_types[1]
-                    +create_schedule.schedule_dictionaries.trip_types[trip_name]]
+            num_trips_list = [u.__dict__ for u in num_trips_object.all()]
 
-        num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
-                            manage_staff.guide.guide.name.in_([guide_name])).update(
-                                {create_schedule.schedule_dictionaries.guide_roles[role]
-                                +create_schedule.schedule_dictionaries.time_types[1]
-                                +create_schedule.schedule_dictionaries.trip_types[trip_name]:num_trips
-                                +priority_change},synchronize_session=False)
+            num_trips = num_trips_list[0][create_schedule.schedule_dictionaries.guide_roles[role]
+                        +create_schedule.schedule_dictionaries.time_types[1]
+                        +create_schedule.schedule_dictionaries.trip_types[trip_name]]
 
-        session_guide.commit()
+            num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
+                                manage_staff.guide.guide.name.in_([guide_name])).update(
+                                    {create_schedule.schedule_dictionaries.guide_roles[role]
+                                    +create_schedule.schedule_dictionaries.time_types[1]
+                                    +create_schedule.schedule_dictionaries.trip_types[trip_name]:num_trips
+                                    +priority_change},synchronize_session=False)
+
+            session_guide.commit()
 
 ################################################################################
 
 
-def update_num_trips_driver(driver_name, trip_name, priority_change):
+def update_num_trips_driver(driver_name, trip_name, priority_change, date_to_be_updated):
 
     num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
                             manage_staff.driver.driver.name.in_([driver_name])).options(
@@ -130,28 +143,39 @@ def update_num_trips_driver(driver_name, trip_name, priority_change):
 
     session_driver.commit()
 
-    num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
-                            manage_staff.driver.driver.name.in_([driver_name])).options(
-                                load_only("driven_"
-                                    +create_schedule.schedule_dictionaries.time_types[1]
-                                    +create_schedule.schedule_dictionaries.trip_types[trip_name]
-                                )
+    period_to_be_updated = create_schedule.schedule_util.get_current_period(date_to_be_updated)
+    print("PERIOD TO BE UPDATE: ", period_to_be_updated)
+    period_object = session_schedule.query(
+                        func.max(
+                            create_schedule.create_new_schedule.schedule.period
                             )
+                        )
+    period_list = [u.__dict__ for u in period_object.all()]
+    print("PERIOD LIST: ", period_list)
+    if period_to_be_updated == period_list['period']:
 
-    num_trips_list = [u.__dict__ for u in num_trips_object.all()]
+        num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
+                                manage_staff.driver.driver.name.in_([driver_name])).options(
+                                    load_only("driven_"
+                                        +create_schedule.schedule_dictionaries.time_types[1]
+                                        +create_schedule.schedule_dictionaries.trip_types[trip_name]
+                                    )
+                                )
 
-    num_trips = num_trips_list[0]["driven_"
-                                  +create_schedule.schedule_dictionaries.time_types[1]
-                                  +create_schedule.schedule_dictionaries.trip_types[trip_name]]
+        num_trips_list = [u.__dict__ for u in num_trips_object.all()]
 
-    num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
-                        manage_staff.driver.driver.name.in_([driver_name])).update(
-                            {"driven_"
-                            +create_schedule.schedule_dictionaries.time_types[1]
-                            +create_schedule.schedule_dictionaries.trip_types[trip_name]:num_trips
-                            +priority_change},synchronize_session=False)
+        num_trips = num_trips_list[0]["driven_"
+                                      +create_schedule.schedule_dictionaries.time_types[1]
+                                      +create_schedule.schedule_dictionaries.trip_types[trip_name]]
 
-    session_driver.commit()
+        num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
+                            manage_staff.driver.driver.name.in_([driver_name])).update(
+                                {"driven_"
+                                +create_schedule.schedule_dictionaries.time_types[1]
+                                +create_schedule.schedule_dictionaries.trip_types[trip_name]:num_trips
+                                +priority_change},synchronize_session=False)
+
+        session_driver.commit()
 
 ################################################################################
 
