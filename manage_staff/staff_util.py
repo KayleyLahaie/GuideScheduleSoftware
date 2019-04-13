@@ -29,8 +29,6 @@ import manage_staff
 from manage_staff import guide
 from manage_staff import driver
 
-session_guide = guide.guide_session()
-session_driver = driver.driver_session()
 session_schedule = create_new_schedule.schedule_session()
 
 ################################################################################
@@ -58,7 +56,7 @@ def is_day_off(guide_name, current_date):
 ################################################################################
 
 
-def update_num_trips_guide(guide_name, trip_name, priority_change, role, date_to_be_updated):
+def update_num_trips_guide(session_guide, session_schedule, guide_name, trip_name, priority_change, role, date_to_be_updated):
 
     if guide_name != 'No Guides Left':
         num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
@@ -84,23 +82,21 @@ def update_num_trips_guide(guide_name, trip_name, priority_change, role, date_to
         session_guide.commit()
 
         period_to_be_updated = create_schedule.schedule_util.get_current_period(date_to_be_updated)
-        print("PERIOD TO BE UPDATE: ", period_to_be_updated)
+        print("PERIOD TO BE UPDATED FOR ",role, ": ", period_to_be_updated)
         period_object = session_schedule.query(create_schedule.create_new_schedule.schedule).options(
                             load_only('period')
                         )
 
-        print("PERIOD OBJECT: ", period_object)
         period_list = [u.__dict__ for u in period_object.all()]
-        print("PERIOD LIST: ", period_list)
         period_max = 0
         for period in period_list:
             if period['period'] > period_max:
                 period_max = period['period']
 
-        print("PERIOD MAX: ", period_max)
+        print("PERIOD CURRENTLY BEING RECORDED: ", period_max)
         if period_to_be_updated == period_max:
 
-            print("PERIOD TO BE UPDATED: ",period_to_be_updated)
+            print("PERIOD'S MATCHED, WILL BE UPDATING FOR", role,": ",period_to_be_updated)
 
             num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
                                 manage_staff.guide.guide.name.in_(
@@ -127,7 +123,7 @@ def update_num_trips_guide(guide_name, trip_name, priority_change, role, date_to
 ################################################################################
 
 
-def update_num_trips_driver(driver_name, trip_name, priority_change, date_to_be_updated):
+def update_num_trips_driver(session_driver, session_schedule, driver_name, trip_name, priority_change, date_to_be_updated):
 
     num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
                             manage_staff.driver.driver.name.in_([driver_name])).options(
@@ -154,21 +150,21 @@ def update_num_trips_driver(driver_name, trip_name, priority_change, date_to_be_
     session_driver.commit()
 
     period_to_be_updated = create_schedule.schedule_util.get_current_period(date_to_be_updated)
-    print("PERIOD TO BE UPDATE DRIVER: ", period_to_be_updated)
+    print("PERIOD TO BE UPDATED FOR DRIVER: ", period_to_be_updated)
     period_object = session_schedule.query(create_schedule.create_new_schedule.schedule).options(
                         load_only('period')
                     )
-
-    print("PERIOD OBJECT DRIVER: ", period_object)
     period_list = [u.__dict__ for u in period_object.all()]
-    print("PERIOD LIST DRIVER: ", period_list)
+
     period_max = 0
     for period in period_list:
         if period['period'] > period_max:
             period_max = period['period']
 
-    print("PERIOD MAX DRIVER: ", period_max)
+    print("PERIOD CURRENTLY BEING RECORDED FOR DRIVER: ", period_max)
     if period_to_be_updated == period_max:
+
+        print("PERIOD'S MATCHED, WILL BE UPDATING FOR DRIVER: ",period_to_be_updated)
 
         num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
                                 manage_staff.driver.driver.name.in_([driver_name])).options(
@@ -200,14 +196,9 @@ def reset_this_period():
     all_drivers = get_total_drivers()
     all_guides = get_total_guides()
 
-    #print("RESETING DRIVERS")
 
     for driver in all_drivers:
-        #print("DRIVER: ", driver['name'])
-
         for trip in create_schedule.schedule_dictionaries.trip_types:
-            #print("TRIP: ", trip)
-
             num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
                                 manage_staff.driver.driver.name == driver['name']).update(
                                     {"driven_"
@@ -217,16 +208,9 @@ def reset_this_period():
 
             session_driver.commit()
 
-    #print("RESETING GUIDES")
     for guide in all_guides:
-        #print("GUIDE: ", guide)
-
         for trip in create_schedule.schedule_dictionaries.trip_types:
-            #print("TRIP: ", trip)
-
             for role in create_schedule.schedule_dictionaries.guide_roles:
-                #print("ROLE: ", role)
-
                 num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
                                     manage_staff.guide.guide.name == guide['name']).update(
                                         {create_schedule.schedule_dictionaries.guide_roles[role]
@@ -294,14 +278,8 @@ def get_guides_can_work(trip_type, role_type):
     final_guides_list = []
 
     for n in range(len(guides_can_work_list)):
-
-        print("for loop entered")
-        print("guide: ", guides_can_work_list[n]['name'] ,", " , guides_can_work_list[n][create_schedule.schedule_dictionaries.guide_roles[role_type]+create_schedule.schedule_dictionaries.trip_types[trip_type]])
-
         if guides_can_work_list[n][create_schedule.schedule_dictionaries.guide_roles[role_type]
                 +create_schedule.schedule_dictionaries.trip_types[trip_type]] == '1':
-
             final_guides_list.append(guides_can_work_list[n]['name'])
 
-            print(final_guides_list)
     return final_guides_list
