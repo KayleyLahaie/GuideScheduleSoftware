@@ -6,15 +6,15 @@ import operator
 
 from create_schedule import schedule_dictionaries
 
-connection_staff = sqlite3.connect('staff.db')
-c_staff = connection_staff.cursor()
+#connection_staff = sqlite3.connect('staff.db')
+#c_staff = connection_staff.cursor()
 
-session_guide = manage_staff.guide.guide_session()
-session_driver = manage_staff.driver.driver_session()
+#session_guide = manage_staff.guide.guide_session()
+#session_driver = manage_staff.driver.driver_session()
 
 ################################################################################
 
-def get_guide_priority_matrix():
+def get_guide_priority_matrix(session_guide, session_driver):
 
     guide_dict = {}
     guide_object = session_guide.query(manage_staff.guide.guide)
@@ -159,7 +159,7 @@ def get_ordered_priority_list(trip, role, class_IV_needed, trips_needing_class_I
 
         print("GUIDES ORDERED LIST: ", guides_ordered_name)
         print("\n")
-        
+
         return guides_ordered_name
 
     else:

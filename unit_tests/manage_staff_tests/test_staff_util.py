@@ -207,6 +207,7 @@ class TestStaffUtil(unittest.TestCase):
 
 
     def test_update_num_trips_guide(self):
+        print("GUIDE #################################################################")
         manage_staff.staff_util.update_num_trips_guide(self.session_test_guide, self.session_test_schedule, "Test Guide", 0, 1, 0, "2019-05-22")
 
         for time_types in range(0,2):
@@ -222,12 +223,38 @@ class TestStaffUtil(unittest.TestCase):
                                           +create_schedule.schedule_dictionaries.trip_types[0]]
 
             if time_types == 0:
+                print(trip_count, "== ", 2,"??")
                 self.assertEqual(trip_count, 2)
-            else if time_types == 1:
+            elif time_types == 1:
+                print(trip_count, "== ", 0,"??")
+                self.assertEqual(trip_count, 0)
+
+    def test_update_num_trips_guide_same_period(self):
+        print("GUIDE SAME PERIOD######################################################")
+        manage_staff.staff_util.update_num_trips_guide(self.session_test_guide, self.session_test_schedule, "Test Guide", 0, 1, 0, "2019-07-22")
+
+        for time_types in range(0,2):
+            trip_count_object = self.session_test_guide.query(manage_staff.guide.guide).filter(
+                                manage_staff.guide.guide.name == "Test Guide").options(load_only(
+                                    create_schedule.schedule_dictionaries.guide_roles[0]
+                                    +create_schedule.schedule_dictionaries.time_types[time_types]
+                                    +create_schedule.schedule_dictionaries.trip_types[0]
+                                ))
+            trip_count_list = [u.__dict__ for u in trip_count_object.all()]
+            trip_count = trip_count_list[0][create_schedule.schedule_dictionaries.guide_roles[0]
+                                          +create_schedule.schedule_dictionaries.time_types[time_types]
+                                          +create_schedule.schedule_dictionaries.trip_types[0]]
+
+            if time_types == 0:
+                print(trip_count, "== ", 3,"??")
+                self.assertEqual(trip_count, 3)
+            elif time_types == 1:
+                print(trip_count, "== ", 1,"??")
                 self.assertEqual(trip_count, 1)
 
 
     def test_update_num_trips_driver(self):
+        print("DRIVER################################################################")
         manage_staff.staff_util.update_num_trips_driver(self.session_test_driver, self.session_test_schedule, "Test Driver", 0, 1, "2019-05-22")
 
         for time_types in range(0,2):
@@ -235,7 +262,7 @@ class TestStaffUtil(unittest.TestCase):
                                     manage_staff.driver.driver.name == "Test Driver").options(
                                         load_only(
                                             "driven_"
-                                            +create_schedule.schedule_dictionaries.time_types[0]
+                                            +create_schedule.schedule_dictionaries.time_types[time_types]
                                             +create_schedule.schedule_dictionaries.trip_types[0]
                                         )
                                     )
@@ -243,17 +270,83 @@ class TestStaffUtil(unittest.TestCase):
             trip_count_list = [u.__dict__ for u in trip_count_object.all()]
 
             trip_count = trip_count_list[0]["driven_"
-                                          +create_schedule.schedule_dictionaries.time_types[0]
+                                          +create_schedule.schedule_dictionaries.time_types[time_types]
                                           +create_schedule.schedule_dictionaries.trip_types[0]]
 
-            self.assertEqual(trip_count, 2)
+            if time_types == 0:
+                print(trip_count, "== ", 2,"??")
+                self.assertEqual(trip_count, 2)
+            elif time_types == 1:
+                print(trip_count, "== ", 0,"??")
+                self.assertEqual(trip_count, 0)
 
 
+    def test_update_num_trips_driver_same_period(self):
+        print("DRIVER SAME PERIOD####################################################")
+        manage_staff.staff_util.update_num_trips_driver(self.session_test_driver, self.session_test_schedule, "Test Driver", 0, 1, "2019-07-22")
+
+        for time_types in range(0,2):
+            trip_count_object = self.session_test_driver.query(manage_staff.driver.driver).filter(
+                                    manage_staff.driver.driver.name == "Test Driver").options(
+                                        load_only(
+                                            "driven_"
+                                            +create_schedule.schedule_dictionaries.time_types[time_types]
+                                            +create_schedule.schedule_dictionaries.trip_types[0]
+                                        )
+                                    )
+
+            trip_count_list = [u.__dict__ for u in trip_count_object.all()]
+
+            trip_count = trip_count_list[0]["driven_"
+                                          +create_schedule.schedule_dictionaries.time_types[time_types]
+                                          +create_schedule.schedule_dictionaries.trip_types[0]]
+
+            if time_types == 0:
+                print(trip_count, "== ", 3,"??")
+                self.assertEqual(trip_count, 3)
+            elif time_types == 1:
+                print(trip_count, "== ", 1,"??")
+                self.assertEqual(trip_count, 1)
+
+    def test_reset_period(self):
+        print("RESET#################################################################")
+        manage_staff.staff_util.reset_this_period(self.session_test_guide, self.session_test_driver)
+
+        for trip in create_schedule.schedule_dictionaries.trip_types:
+
+            period_count_object = self.session_test_driver.query(manage_staff.driver.driver).filter(
+                                    manage_staff.driver.driver.name == "Test Driver").options(
+                                        load_only(
+                                            "driven_"
+                                            +create_schedule.schedule_dictionaries.time_types[1]
+                                            +create_schedule.schedule_dictionaries.trip_types[trip]
+                                        )
+                                    )
+            period_count_list = [u.__dict__ for u in period_count_object.all()]
+            period_count = period_count_list[0]["driven_"
+                                          +create_schedule.schedule_dictionaries.time_types[1]
+                                          +create_schedule.schedule_dictionaries.trip_types[trip]]
+
+            self.assertEqual(period_count, 0)
+
+            period_count_object = self.session_test_guide.query(manage_staff.guide.guide).filter(
+                                manage_staff.guide.guide.name == "Test Guide").options(load_only(
+                                    create_schedule.schedule_dictionaries.guide_roles[0]
+                                    +create_schedule.schedule_dictionaries.time_types[1]
+                                    +create_schedule.schedule_dictionaries.trip_types[0]
+                                ))
+            period_count_list = [u.__dict__ for u in period_count_object.all()]
+            period_count = period_count_list[0][create_schedule.schedule_dictionaries.guide_roles[0]
+                                          +create_schedule.schedule_dictionaries.time_types[1]
+                                          +create_schedule.schedule_dictionaries.trip_types[0]]
+
+            self.assertEqual(period_count, 0)
 
     @classmethod
     def tearDownClass(cls):
         print("tear")
         cls.session_test_guide.close()
         cls.session_test_driver.close()
+        cls.session_test_schedule.close()
         os.remove("staff_test.db")
-        os.remove()
+        os.remove("schedule_test.db")

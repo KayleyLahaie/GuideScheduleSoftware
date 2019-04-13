@@ -191,16 +191,16 @@ def update_num_trips_driver(session_driver, session_schedule, driver_name, trip_
 
 ################################################################################
 
-def reset_this_period():
+def reset_this_period(session_guide, session_driver):
 
-    all_drivers = get_total_drivers()
-    all_guides = get_total_guides()
-
+    all_drivers = get_total_drivers(session_driver)
+    all_guides = get_total_guides(session_guide)
 
     for driver in all_drivers:
+        name = driver['name']
         for trip in create_schedule.schedule_dictionaries.trip_types:
             num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
-                                manage_staff.driver.driver.name == driver['name']).update(
+                                manage_staff.driver.driver.name == name).update(
                                     {"driven_"
                                     +create_schedule.schedule_dictionaries.time_types[1]
                                     +create_schedule.schedule_dictionaries.trip_types[trip]:0
@@ -208,11 +208,13 @@ def reset_this_period():
 
             session_driver.commit()
 
+
     for guide in all_guides:
+        name = guide['name']
         for trip in create_schedule.schedule_dictionaries.trip_types:
             for role in create_schedule.schedule_dictionaries.guide_roles:
                 num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
-                                    manage_staff.guide.guide.name == guide['name']).update(
+                                    manage_staff.guide.guide.name ==name).update(
                                         {create_schedule.schedule_dictionaries.guide_roles[role]
                                         +create_schedule.schedule_dictionaries.time_types[1]
                                         +create_schedule.schedule_dictionaries.trip_types[trip]:0
@@ -220,9 +222,11 @@ def reset_this_period():
 
                 session_guide.commit()
 
+
+
 ################################################################################
 
-def get_total_guides():
+def get_total_guides(session_guide):
 
     all_guides_object = session_guide.query(manage_staff.guide.guide).filter(
                             manage_staff.guide.guide.in_stream.in_(['true']))
@@ -244,13 +248,12 @@ def get_total_temp_guides():
 
 ################################################################################
 
-def get_total_drivers():
+def get_total_drivers(session_driver):
 
-    all_drivers_object = session_guide.query(manage_staff.driver.driver).filter(
+    all_drivers_object = session_driver.query(manage_staff.driver.driver).filter(
                             manage_staff.driver.driver.in_stream.in_(['true']))
 
     all_drivers_list = [u.__dict__ for u in all_drivers_object.all()]
-
     return all_drivers_list
 
 ################################################################################
