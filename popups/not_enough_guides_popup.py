@@ -1,12 +1,3 @@
-    # -*- coding: utf-8 -*-
-
-    # Form implementation generated from reading ui file 'dialogwindow.ui'
-    #
-    # Created: Mon Feb 18 18:32:39 2019
-    #      by: pyside-uic 0.2.15 running on PySide 1.2.4
-    #
-    # WARNING! All changes made in this file will be lost!
-
 from PySide2 import QtCore, QtGui, QtWidgets
 import manage_staff
 from manage_staff import staff_util
@@ -16,8 +7,43 @@ from manage_staff import guide
 session_guide = guide.guide_session()
 
 class Ui_not_enough_guides_popup(object):
+    """
+    Produces the ui for a pop up window that provides functionality for
+    selecting or creating a temporary guide when more guides are needed than
+    are currently on staff
+
+    Methods
+    -------
+    setupUi(self, not_enough_guides_popup, DialogBox)
+        Sets up all of the objects and adds them to the DialogBox
+
+    retranslateUi(self, not_enough_guides_popup)
+        Translates the string properties of the form
+
+    choose_temporary_guide(self)
+        Choose a temporary guide from a list or create a new one using the
+        fields provided
+
+    return_temp_guide(self)
+        Return the selected guide to the main window
+    """
 
     def setupUi(self, not_enough_guides_popup, DialogBox):
+        """Sets up all of the objects and adds them to the DialogBox
+
+        Parameters
+        ----------
+        not_enough_guides_popup : QDialog
+            A QDialog object created in create_schedule_day() that allows the
+            dialog to be created by the method when needed
+        DialogBox : QDialog
+            A QDialog object created in create_schedule_day() that allows the
+            dialog to be created by the method when needed
+
+        Method Calls
+        ------------
+            -retranslateUi()
+        """
 
         self.DialogBox = DialogBox
         self.temp_guide = ""
@@ -38,7 +64,7 @@ class Ui_not_enough_guides_popup(object):
         self.comboBox.addItem("Unknown")
 
         num_temp_guides = manage_staff.staff_util.get_total_temp_guides()
-        print(num_temp_guides)
+        #enumerator
         for x in range(len(num_temp_guides)):
             self.comboBox.addItem(num_temp_guides[x]['name'])
 
@@ -181,10 +207,15 @@ class Ui_not_enough_guides_popup(object):
         self.retranslateUi(not_enough_guides_popup)
         QtCore.QMetaObject.connectSlotsByName(not_enough_guides_popup)
 
-################################################################################
-
-
     def retranslateUi(self, not_enough_guides_popup):
+        """Translates the string properties of the form
+
+        Parameters
+        ----------
+        not_enough_guides_popup : QDialog
+            A QDialog object created in create_schedule_day() that allows the
+            dialog to be created by the method when needed
+        """
 
         not_enough_guides_popup.setWindowTitle(QtWidgets.QApplication.translate(
             "not_enough_guides_popup",
@@ -352,14 +383,19 @@ class Ui_not_enough_guides_popup(object):
             0)
         )
 
-################################################################################
-
-
     def choose_temporary_guide(self):
+        """Choose a temporary guide from a list or create a new one using the
+        fields provided
+
+        If a new temporary guide is to be created, data is gathered from the
+        fields and a new guide object is created and submitted to the guide
+        table in staff.db
+
+        """
 
         name = self.guide_name.toPlainText()
 
-        if name != "":
+        if name != "" and self.comboBox.currentText() == "Choose Guide...":
 
             has_class_IV = self.class_IV.isChecked()
             four_hour_guide = self.can_guide_four_hour.isChecked()
@@ -436,14 +472,15 @@ class Ui_not_enough_guides_popup(object):
         elif self.comboBox.currentText() != "Choose Guide...":
 
             self.temp_guide = self.comboBox.currentText()
-
-            print("Chose ", self.temp_guide)
-
             self.DialogBox.accept()
 
-################################################################################
-
-
     def return_temp_guide(self):
+        """Return the selected guide to the main window
+
+        Returns
+        -------
+        str
+            The string representation of the name of the temporary guide chosen
+        """
 
         return self.temp_guide

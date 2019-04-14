@@ -28,6 +28,13 @@ session_driver = driver.driver_session()
 
 
 class schedule(schedule_base):
+    """
+    Produces a schedule object used for stroing the names of guides and drivers
+    assigned to work each trip and role
+
+    All attributes are column objects of either type string or integer and
+    represent a column in the schedule table of the trips.db file
+    """
 
     __tablename__ = 'schedule'
     date = Column(String, primary_key=True)
@@ -138,6 +145,25 @@ class schedule(schedule_base):
 
 
 def add_new_date(current_date):
+    """Create a schedule object for the given date and commit it to the schedule
+    table in trips.db
+
+    Parameters
+    ----------
+    current_date : date
+        A date object representing the date for which a schedule must be
+        created
+
+    Method Calls
+    ------------
+        -update_num_trips_guide()
+        -update_num_trips_driver()
+
+    Returns
+    ------
+    schedule
+        returns a schedule object that has been created for the given day
+    """
 
     schedule_object = session_schedule.query(schedule).filter(
                             schedule.date == current_date)
@@ -172,8 +198,6 @@ def add_new_date(current_date):
                 ).delete(synchronize_session=False)
 
         session_schedule.commit()
-
-
 
     current_date_object = schedule( date = current_date,
                                         period = 0,
@@ -289,6 +313,34 @@ def add_new_date(current_date):
 def submit_to_database(trip_role_assignment_final, num_drivers, num_clients,
                        num_guides, num_safety, current_date_object,
                        current_date):
+    """Submit the final values for the current date's schedule to the schedule
+    table in trips.db
+
+    Parameters
+    ----------
+    trip_role_assignment_final: dict
+        A dictionary containing the final iteration of the schedule
+    num_drivers: dict
+        A dictionary containing integer value representing the number of
+        drivers needed for each trip
+    num_clients: dict
+        A dictionary containing integer value representing the number of
+        clients booked onto each trip
+    num_guides: dict
+        A dictionary containing integer value representing the number of
+        guides needed for each trip
+    num_safety: dict
+        A dictionary containing integer value representing the number of
+        safety kayakers needed for each trip
+    current_date_object: schedule
+        The schedule object that corresponds to the date being scheduled
+    current_date: date
+        A date object representing the date to be scheduled
+
+    Method Calls
+    ------------
+        -get_current_period()
+    """
 
     current_date_object.date = current_date
     current_date_object.period = schedule_util.get_current_period(current_date)

@@ -15,20 +15,56 @@ import manage_staff
 from manage_staff import staff_util
 
 class Ui_overnight_popup(object):
+    """
+    Produces the ui for a pop up window that provides functionality for
+    selecting the staff members to work on an overnight trip
+
+    Methods
+    -------
+    setupUi(self, not_enough_guides_popup, DialogBox)
+        Sets up all of the objects and adds them to the DialogBox
+
+    retranslateUi(self, not_enough_guides_popup)
+        Translates the string properties of the form
+
+    submit_staff(self)
+        Inserts selected staff into the trip_role_assignment dictionary
+
+    return_data(self)
+        Return the selected staff to the main window
+    """
 
     def setupUi(self, overnight_popup, num_guides, current_date, trip_role_assignment, DialogBox):
+        """Sets up all of the objects and adds them to the DialogBox
+
+        Parameters
+        ----------
+        overnight_popup: QDialog
+            A QDialog object created in create_schedule_day() that allows the
+            dialog to be created by the method when needed
+        num_guides: int
+            The number of guides needed for the trip
+        current_date : date
+            A date object representing the date for which a schedule must be
+            created
+        trip_role_assignment: dict
+            An empty dictionary to be filled with the names of the staff members
+            assigned to each role
+        DialogBox: QDialog
+            A QDialog object created in create_schedule_day() that allows the
+            dialog to be created by the method when needed
+
+        Method Calls
+        ------------
+            -retranslateUi()
+        """
 
         self.DialogBox = DialogBox
-        print(self.DialogBox)
+        self.num_guides = num_guides
+        self.trip_role_assignment = trip_role_assignment
 
         self.comboBoxes = [0,0,0,0]
         self.labels = [0,0,0,0]
-
-        self.num_guides = num_guides
-
-        self.trip_role_assignment = trip_role_assignment
-
-        print(num_guides)
 
         overnight_popup.setObjectName("overnight_popup")
         overnight_popup.resize(700, 500)
@@ -46,7 +82,6 @@ class Ui_overnight_popup(object):
                                             "padding-left: 15px;")
         self.main_label.setObjectName("main_label")
 
-
         x_text = 175
         y_text = 112.5
 
@@ -54,8 +89,6 @@ class Ui_overnight_popup(object):
         y_label = 94
 
         for n in range(num_guides):
-            print("n = ", n)
-
             guides_available = manage_staff.staff_util.get_guides_can_work(
                                     4,
                                     create_schedule.schedule_dictionaries.guide_roles_converter[n]
@@ -80,9 +113,7 @@ class Ui_overnight_popup(object):
             y_text += 50
             y_label += 62.5
 
-
         if(num_guides == 1):
-
             guides_available = manage_staff.staff_util.get_guides_can_work(
                                     4,
                                     create_schedule.schedule_dictionaries.guide_roles_converter[4]
@@ -121,6 +152,21 @@ class Ui_overnight_popup(object):
         QtCore.QMetaObject.connectSlotsByName(overnight_popup)
 
     def retranslateUi(self, overnight_popup, num_guides, labels, current_date):
+        """Sets up all of the objects and adds them to the DialogBox
+
+        Parameters
+        ----------
+        overnight_popup: QDialog
+            A QDialog object created in create_schedule_day() that allows the
+            dialog to be created by the method when needed
+        num_guides: int
+            The number of guides needed for the trip
+        labels: list
+            A list of QLabel widgets
+        current_date : date
+            A date object representing the date for which a schedule must be
+            created
+        """
 
         overnight_popup.setWindowTitle(QtWidgets.QApplication.translate(
             "overnight_popup",
@@ -166,31 +212,37 @@ class Ui_overnight_popup(object):
             )
 
     def submit_staff(self):
+        """Inserts selected staff into the trip_role_assignment dictionary
+
+        Selects the staff chosen by the user for each of the combo boxes and
+        adds them to the trip_role_assignment dictionary
+
+        # TODO: Check to make sure the same guide is not chosen for multiple
+        # roles
+        """
 
         for n in range(self.num_guides):
-
-            print("role assignment: ", create_schedule.schedule_dictionaries.role_switch[n]+create_schedule.schedule_dictionaries.trip_types[4])
-
             self.trip_role_assignment[
                 create_schedule.schedule_dictionaries.role_switch[n]
                 +create_schedule.schedule_dictionaries.trip_types[4]
             ] = self.comboBoxes[n].currentText()
 
         if self.num_guides == 1:
-
-            print("safety assignment: ", create_schedule.schedule_dictionaries.role_switch[4]+create_schedule.schedule_dictionaries.trip_types[4])
-
             self.trip_role_assignment[
                 create_schedule.schedule_dictionaries.role_switch[4]
                 +create_schedule.schedule_dictionaries.trip_types[4]
             ] = self.safety_name.currentText()
 
-        print(self.trip_role_assignment)
-
         self.DialogBox.accept()
 
-################################################################################
-
-
     def return_data(self):
+        """Returns the trip_role_assignment dictionary to the main setWindowTitle
+
+        Returns
+        -------
+        dict
+            An dictionary containing the names of the staff members assigned to
+            each role on the overnight trip
+
+        """
         return self.trip_role_assignment

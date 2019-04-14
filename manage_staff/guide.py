@@ -12,6 +12,14 @@ guide_base = declarative_base()
 guide_session = sessionmaker(bind=guide_engine)
 
 class guide(guide_base):
+    """
+    Produces a guide object used for calculating trip and role priorities and
+    tracking trips worked
+
+    All attributes are column objects of either type string or integer and
+    represent a column in the guide table of the staff.db file
+    """
+    
     __tablename__ = 'guides'
     name = Column(String, primary_key=True)
     in_stream = Column(String)

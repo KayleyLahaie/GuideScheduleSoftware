@@ -6,15 +6,26 @@ import operator
 
 from create_schedule import schedule_dictionaries
 
-#connection_staff = sqlite3.connect('staff.db')
-#c_staff = connection_staff.cursor()
+def get_guide_priority_matrix(session_guide):
 
-#session_guide = manage_staff.guide.guide_session()
-#session_driver = manage_staff.driver.driver_session()
+    """Calculate each guide's priority for each trip and role and store them
+    inside a matrix
 
-################################################################################
+    The trips in the current guide priorities are ordered guide roles and then
+    by trips where the guide roles are defined in the guide_roles dictionary and
+    the trips are defined in the trip_types dictionary
 
-def get_guide_priority_matrix(session_guide, session_driver):
+    Parameters
+    ----------
+    session_guide: session
+        A session object that allows access to the guide table in staff.db
+
+    Returns
+    -------
+    dict
+        A dictionary with the names of all considered guides as keys and lists
+        of the guide's priorities for all of the trips as the values
+    """
 
     guide_dict = {}
     guide_object = session_guide.query(manage_staff.guide.guide)
@@ -37,7 +48,7 @@ def get_guide_priority_matrix(session_guide, session_driver):
             #g(i)
             g_of_i = []
 
-
+            #enumerators
             for x in range(len(create_schedule.schedule_dictionaries.trip_types)):
                 for y in range(len(create_schedule.schedule_dictionaries.guide_roles)):
                     #x
@@ -117,15 +128,49 @@ def get_guide_priority_matrix(session_guide, session_driver):
 
     return guide_dict
 
-################################################################################
-# trip and role =  numbers from schedule_dictionaries.trip_type and schedule_dictionaries.guide_roles
-def get_ordered_priority_list(trip, role, class_IV_needed, trips_needing_class_IV_guide):
+def get_ordered_priority_list(session_guide, session_driver, trip, role,
+                                class_IV_needed, trips_needing_class_IV_guide):
+    """Create a list that shows the order in which guides or drivers should be
+    considered for the given trip and role
+
+    Parameters
+    ----------
+    session_guide: session
+        A session object that allows access to the guide table in staff.db
+    session_driver: session
+        A session object that allows access to the driver table in staff.db
+    trip: int
+        An integer value representing the trip being scheduled where trip
+        corresponds to the key values of the trip_types dictionary
+    role: int
+        A number representing the role being assigned where role corresponds to
+        the key values of the role_switch dictionary
+    class_IV_needed: dict
+        An empty dictionary used to keep track of which trips need a guide with
+        a Class IV driver's license
+    trips_needing_class_IV_guide: int
+        An integer representing the number of trips that will need a guide with
+        a Class IV drivers license after all drivers with licenses have been
+        assigned
+
+    Method Calls
+    ------------
+        -get_guide_priority_matrix()
+        -get_driver_priority_matrix()
+        -calculate_priority()
+
+    Returns
+    -------
+    list
+        A list containing the names of the guides OR the drivers in the order
+        in which they should be prioritized for the position and role being scheduled
+    """
 
     if role <= 4:
         print("\n")
         print("GETTING ORDERED PRIORITY LIST FOR ", role)
         print("##############################################################")
-        guide_priority_matrix = get_guide_priority_matrix()
+        guide_priority_matrix = get_guide_priority_matrix(session_guide)
 
         guides = {}
         guides_ordered_name = []
@@ -166,7 +211,7 @@ def get_ordered_priority_list(trip, role, class_IV_needed, trips_needing_class_I
         print("\n")
         print("GETTING ORDERED PRIORITY LIST FROM DRIVER")
         print("##############################################################")
-        driver_priority_matrix = get_driver_priority_matrix()
+        driver_priority_matrix = get_driver_priority_matrix(session_driver)
 
         driver_s = {}
         drivers = {}
@@ -214,20 +259,61 @@ def get_ordered_priority_list(trip, role, class_IV_needed, trips_needing_class_I
                 #del drivers_ordered_priority[i]
                 #del drivers_ordered_name[i]
 
-        calculated_priority_drivers = calculate_priority(driver_priority_matrix, drivers_ordered_name, drivers_ordered_priority, drivers_ordered_seniority, trip, role, class_IV_needed)
+        calculated_priority_drivers = calculate_priority(session_driver, driver_priority_matrix, drivers_ordered_name, drivers_ordered_priority, drivers_ordered_seniority, trip, role, class_IV_needed)
+
         return calculated_priority_drivers
 
-################################################################################
+def calculate_priority(session_driver, driver_priority_matrix,
+                        driver_ordered_name, driver_ordered_priority,
+                        drivers_ordered_seniority, trip, role, class_IV_needed):
+    """Further refine the order that drivers should be considered based on
+    whether a driver with a Class IV license is needed for the trip
 
-def calculate_priority(driver_priority_matrix, driver_ordered_name, driver_ordered_priority, drivers_ordered_seniority, trip, role, class_IV_needed):
+    Parameters
+    ----------
+    session_driver: session
+        A session object that allows access to the driver table in staff.db
+    driver_priority_matrix: dict
+        A dictionary with the names of all considered drivers as keys and lists
+        of the driver's priorities for all of the trips as the values
+    driver_ordered_name: list
+        A list containing the names of the drivers in the order in which they
+        should be prioritized for the position and role being scheduled based on
+        the priority calculations
+    driver_ordered_priority: list
+        A list containing the priorities of the drivers in order from smallest
+        to largest, where the smallest priority belongs to the highest priority
+        driver
+    drivers_ordered_seniority: list
+        A list containing the seniorities of the drivers corresponding to the
+        order of the names in the guides_ordered_name list
+    trip: int
+        An integer value representing the trip being scheduled where trip
+        corresponds to the key values of the trip_types dictionary
+    role: int
+        A number representing the role being assigned where role corresponds to
+        the key values of the role_switch dictionary
+    class_IV_needed: dict
+        An empty dictionary used to keep track of which trips need a guide with
+        a Class IV driver's license
+
+    Returns
+    -------
+    list
+        A list containing drivers in the order in which they should be
+        prioritized for the position and role being scheduled refined by whether
+        or not a Class IV driver is needed for the trip
+    """
 
     calculated_priority_drivers=[]
 
     if (class_IV_needed[
             create_schedule.schedule_dictionaries.trip_types[trip]
         ] == 1):
+
         print("\n")
         print("CLASS IV DRIVER NOT NEEDED")
+
         for index in range(len(driver_ordered_name)):
             seniority = drivers_ordered_seniority[index]
             if seniority == 1:
@@ -241,11 +327,13 @@ def calculate_priority(driver_priority_matrix, driver_ordered_name, driver_order
 
         print("FINAL CALCULATED PRIORITY LIST: ", calculated_priority_drivers)
         print("\n")
+
         return calculated_priority_drivers
 
     else:
         print("\n")
         print("CLASS IV DRIVER NEEDED")
+
         for index in range(len(driver_ordered_name)):
             driver_object = session_driver.query(manage_staff.driver.driver).filter(
                                     manage_staff.driver.driver.name == driver_ordered_name[index]
@@ -258,13 +346,32 @@ def calculate_priority(driver_priority_matrix, driver_ordered_name, driver_order
             if has_class_IV == '1':
                 calculated_priority_drivers.append(driver_ordered_name[index])
 
-
         print("FINAL CALCULATED PRIORITY LIST: ", calculated_priority_drivers)
         print("\n")
+
         return calculated_priority_drivers
 
 
 def calculate_priority_class_IV(guides_ordered_name):
+    """Further refine the order that guides should be considered by moving
+    guides with Class IV to the end of the list (ordered by priorities) to
+    prevent all guides and drivers with Class IV licenses from being assigned
+    to the same trip
+
+    Parameters
+    ----------
+    guides_ordered_name: list
+        A list containing the names of the guides in the order in which they
+        should be prioritized for the position and role being scheduled based on
+        the priority calculations
+
+    Returns
+    -------
+    list
+        A list containing guides in the order in which they should be
+        prioritized for the position and role being scheduled refined by whether
+        or not a Class IV guide has already been assigned to the trip
+    """
 
     temp_guides_ordered_name = guides_ordered_name.copy()
     candidate_object = session_guide.query(manage_staff.guide.guide).filter(
@@ -275,6 +382,7 @@ def calculate_priority_class_IV(guides_ordered_name):
     print("\n")
     print("##############################################################")
     print("GUIDES ORDERED NAME AT START: ", guides_ordered_name)
+
     for guide in guides_ordered_name:
         print("GUIDE: ", guide)
         for candidate in candidate_list:
@@ -290,12 +398,28 @@ def calculate_priority_class_IV(guides_ordered_name):
     guides_ordered_name = temp_guides_ordered_name
 
     return guides_ordered_name
-################################################################################
 
-def get_driver_priority_matrix():
+def get_driver_priority_matrix(session_driver):
+    """Calculate each guide's priority for each trip and role and store them
+    inside a matrix
+
+    The trips in the current driver priorities list are ordered by trips where
+    trips are defined in the trip_types dictionary
+
+    Parameters
+    ----------
+    session_driver: session
+        A session object that allows access to the driver table in staff.db
+
+    Returns
+    -------
+    dict
+        A dictionary with the names of all considered drivers as keys and lists
+        of the driver's priorities for all of the trips as the values
+    """
 
     driver_dict = {}
-    driver_object = session_guide.query(manage_staff.driver.driver)
+    driver_object = session_driver.query(manage_staff.driver.driver)
     driver_list = [u.__dict__ for u in driver_object.all()]
 
 
@@ -362,20 +486,6 @@ def get_driver_priority_matrix():
 
             x = 0
             for i in range(0,10,2):
-
-                #print("#######################################################")
-                #print("i: ", i)
-                #print("trip_worked_quotient[i]*trip_worked_quotient[i+1]: ", (0.4)*(trip_worked_quotient[i]
-                #    +trip_worked_quotient[i+1])**2)
-        #        print("sum_weights: ", (0.2)*sum_weights)
-        #        print("s_of_i[x]: ", (0.4)*s_of_i[x])
-        #        print("d_of_i[x]: ", d_of_i[x])
-        #        print("Final Priority: ", ((0.4)*(trip_worked_quotient[i]
-        #            +trip_worked_quotient[i+1])**2
-        #            +(0.4)*s_of_i[x]
-        #        )*d_of_i[x])
-        #        print("#######################################################")
-
                 current_driver_priorities.append(   trip_worked_quotient[i]
                                                     *trip_worked_quotient[i+1]
                                                     +sum_weights
@@ -386,6 +496,7 @@ def get_driver_priority_matrix():
             print("PRIORITIES FOR ", driver_name,": ", current_driver_priorities)
             driver_dict[driver_name] = (current_driver_priorities, s_of_i)
 
+    #enumerator
     for driver in range(len(driver_list)):
         driver_name = driver_list[driver]['name']
 

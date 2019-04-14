@@ -11,6 +11,14 @@ driver_base = declarative_base()
 driver_session = sessionmaker(bind=driver_engine)
 
 class driver(driver_base):
+    """
+    Produces a driver object used for calculating trip and role priorities and
+    tracking trips worked
+
+    All attributes are column objects of either type string or integer and
+    represent a column in the driver table of the staff.db file
+    """
+
     __tablename__ = 'drivers'
     name = Column(String, primary_key=True)
     in_stream = Column(String)
