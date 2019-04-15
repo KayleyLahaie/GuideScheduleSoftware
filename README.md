@@ -1,6 +1,6 @@
 ﻿# GuideScheduleSoftware
  
-Takes an excel file downloaded from our booking system as input and extracts the necessary data to generate work schedules for raft guides and shuttle drivers at a whitewater rafting company
+Takes an excel file downloaded from our booking system as input and extracts the necessary data to generate work schedules for raft guides and shuttle drivers at a whitewater rafting company.
 
 This project has a user-friendly interface built using Qt and PySide and displays all relevant data concerning schedules, as well as the capabilities and tallies of trips worked for each staff member.
 
