@@ -4,12 +4,12 @@ Takes an excel file downloaded from our booking system as input and extracts the
 
 This project has a user-friendly interface built using Qt and PySide and displays all relevant data concerning schedules, as well as the capabilities and tallies of trips worked for each staff member.
 
-The schedules are created by determining which staff member has the highest priority for each work role on each trip. Calculations produce a set priority values for each staff member, where each value is attached a work role on a certain trip. The staff member with the lowest priority value is the top choice for that role.
+The schedules are created by determining which staff member has the highest priority for each work role on each trip. Calculations produce a set priority values for each staff member, where each value is attached to a work role on a certain trip. The staff member with the lowest priority value is the top choice for that role.
 
 The priorities for the guides are calculated according to the following equation:
 
 
-![](read_me_img/guide_priority_equation.png)
+![Guide Priority Equation](read_me_img/guide_priority_equation.png)
 
 
 Where
@@ -22,9 +22,9 @@ Where
  
     Ra: Number of times all guides have worked this role on any trip
  
-    c(i): Whether or not the guide is allowed to work this role on this trip (1 or 0)
+    c(i): Whether or not the guide is allowed to work this role on the trip with id 'i' (1 or 0)
  
-    w(i): The weight value assigned to this trip
+    w(i): The weight value assigned to the trip with id 'i'
     
     n: The number of trip types
     
@@ -35,7 +35,7 @@ Where
 The priorities for the drivers are calculated according to the following equation:
 
 
-![](read_me_img/driver_priority_equation.png)
+![Driver Priority Equation](read_me_img/driver_priority_equation.png)
 
 
 Where
@@ -48,12 +48,12 @@ Where
  
     Tap: Number of times all drivers have worked on this trip since the start of the most recent period
  
-    c(i): Whether or not the driver is allowed to work this trip (1 or 0)
+    c(i): Whether or not the driver is allowed to work the trip with id 'i' (1 or 0)
  
-    w(i): The weight value assigned to this trip
+    w(i): The weight value assigned to the trip with id 'i'
     
     n: The number of trip types
     
-    x: The ID number of the trip being scheduled
+    x: The ID number of this trip
 
 After the priorities have been calculated, program logic is used to refine the ordering further based on additional factors such as ensuring each trip has at least one staff member with a Class 4 driver's license, and ranking the drivers by their seniority levels for each trip.
