@@ -8,3 +8,41 @@ The schedules are created by determining which staff member has the highest prio
 
 The priorities for the guides are calculated according to the following equation:
 
+
+![](read_me_img/guide_priority_equation.png)
+
+
+Where
+
+    Tg: Number of times the guide has worked any role on this trip
+ 
+    Ta: Number of times all guides have worked any role on this trip
+ 
+    Rg: Number of times the guide has worked this role on any trip
+ 
+    Ra: Number of times all guides have worked this role on any trip
+ 
+    c(i): Whether or not the guide is allowed to work this role on this trip (1 or 0)
+ 
+    w(i): The weight value assigned to this trip (constant)
+
+
+The priorities for the drivers are calculated according to the following equation:
+
+
+![](read_me_img/driver_priority_equation.png)
+
+
+Where
+
+    Tg: Number of times the guide has worked any role on this trip
+ 
+    Ta: Number of times all guides have worked any role on this trip
+ 
+    Rg: Number of times the guide has worked this role on any trip
+ 
+    Ra: Number of times all guides have worked this role on any trip
+ 
+    c(i): Whether or not the guide is allowed to work this role on this trip (1 or 0)
+ 
+    w(i): The weight value assigned to this trip (constant)
