@@ -52,5 +52,7 @@ Where
     w(i): The weight value assigned to this trip
     
     n: The number of trip types
+    
+    x: The ID number of the trip being scheduled
 
 After the priorities have been calculated, program logic is used to refine the ordering further based on additional factors such as ensuring each trip has at least one staff member with a Class 4 driver's license, and ranking the drivers by their seniority levels for each trip.
