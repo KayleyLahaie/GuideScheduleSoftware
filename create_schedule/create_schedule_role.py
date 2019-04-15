@@ -110,15 +110,17 @@ def create_schedule_role(role, current_date, trip_role_assignment, trip,
             calculate_priority_list.remove(candidate)
 
 
-    for trips in range(len(create_schedule.schedule_dictionaries.trip_switch_numerical)-1):
-        for roles in range(len(create_schedule.schedule_dictionaries.role_switch)-1):
-            for candidate in loop_controller:
-                staff_member = current_date_schedule_list[0][
-                            create_schedule.schedule_dictionaries.role_switch[roles]
-                            +create_schedule.schedule_dictionaries.trip_switch_numerical[trips]
-                        ]
-                if candidate is staff_member:
-                    calculate_priority_list.remove(candidate)
+    for trips, value in enumerate(create_schedule.schedule_dictionaries.trip_switch_numerical):
+        if trips < 8:
+            for roles, value in enumerate(create_schedule.schedule_dictionaries.role_switch):
+                if roles < 7:
+                    for candidate in loop_controller:
+                        staff_member = current_date_schedule_list[0][
+                                    create_schedule.schedule_dictionaries.role_switch[roles]
+                                    +create_schedule.schedule_dictionaries.trip_switch_numerical[trips]
+                                ]
+                        if candidate is staff_member:
+                            calculate_priority_list.remove(candidate)
 
 
     if len(calculate_priority_list) > 0:

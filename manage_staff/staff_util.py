@@ -412,7 +412,7 @@ def get_guides_can_work(session_guide, trip_type, role_type):
 
     final_guides_list = []
 
-    for n in range(len(guides_can_work_list)):
+    for n in enumerate(guides_can_work_list):
         if guides_can_work_list[n][create_schedule.schedule_dictionaries.guide_roles[role_type]
                 +create_schedule.schedule_dictionaries.trip_types[trip_type]] == '1':
             final_guides_list.append(guides_can_work_list[n]['name'])

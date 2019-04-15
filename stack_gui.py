@@ -25,8 +25,25 @@ session_driver = manage_staff.driver.driver_session()
 
 
 class hover_button(QtWidgets.QPushButton):
+    """
+    Produces the ui for a button with a hover effect
+
+    Methods
+    -------
+    enterEvent(self, event)
+        Sets the background color of the button to a semi translucent blue
+        when the mouse enters the button
+
+    leaveEvent(self, event)
+        Sets the background color of the button to a semi translucent white
+        when the mouse leaves the button
+    """
 
     def enterEvent(self, event):
+        """ Sets the background color of the button to a semi translucent blue
+        when the mouse enters the button
+        """
+
         self.setStyleSheet("  border: none;\n"
                            "  padding: 5px;\n"
                            "  cursor: pointer;\n"
@@ -38,6 +55,10 @@ class hover_button(QtWidgets.QPushButton):
                            "  color: #ee7838;")
 
     def leaveEvent(self, event):
+        """ Sets the background color of the button to a semi translucent white
+        when the mouse enters the button
+        """
+
         self.setStyleSheet("  border: none;\n"
                            "  padding: 5px;\n"
                            "  cursor: pointer;\n"
@@ -50,8 +71,76 @@ class hover_button(QtWidgets.QPushButton):
 
 
 class Ui_Form(object):
+    """
+    Produces the ui for the main interface
+
+    Methods
+    -------
+    setupUi(self, Form)
+        Sets up all of the widgets and objects and adds them to the Form
+
+    retranslateUi(self, Form)
+        Translates the string properties of the form
+
+    on_clicked_view_staff(self)
+        Switches the active widget to the View Staff widget
+
+    on_clicked_create_guide(self)
+        Switches the active widget to the Create Guide widget
+
+    on_clicked_create_driver(self)
+        Switches the active widget to the Create Driver widget
+
+    on_clicked_view_schedule(self)
+        Switches the active widget to the View Schedule widget
+
+    on_clicked_create_new_schedule(self)
+        Switches the active widget to the Create Schedule widget
+
+    back_page(self)
+        Switches the active widget to the Main Page wdiget when the back button
+        on any other widget is clicked
+
+    create_new_guide(self)
+        Submits the values gathered from the Create Guide widget fields to the
+        guide table in staff.db and switched the active widget to View Staff
+
+    create_new_driver(self)
+        Submits the values gathered from the Create Driver widget fields to the
+        driver table in staff.db and switched the active widget to View Staff
+
+    submit_dates(self)
+        Submits the start and end date values gathered from the View Schedule
+        widget and passes them to the load_schedule_data() method
+
+    load_staff_data(self)
+        Queries the driver and guide tables in staff.db and loads the gathered
+        data into tables in the View Staff widget
+
+    load_schedule_data(self, start_date, end_date)
+        Queries the schedule table in trips.db for rows that fall in between the
+        start and end dates and loads the gathered data into a table in the
+        View Staff widget
+
+    scrape_excel_sheet(self)
+        Creates a scraper object and uses it to extract data from a file path
+        submitted by the user and passes the object and its data to the methods
+        necesary to process the data
+    """
 
     def setupUi(self, Form):
+        """Sets up all of the objects and adds them to the DialogBox
+
+        Parameters
+        ----------
+        Form: QWidget
+            A QWidget object created in the run file
+
+        Method Calls
+        ------------
+            -retranslateUi()
+        """
+
         Form.setObjectName("Form")
         Form.resize(1200, 764)
         self.stackedWidget = QtWidgets.QStackedWidget(Form)
@@ -60,8 +149,6 @@ class Ui_Form(object):
         self.stackedWidget.setStyleSheet("background-color:#FFFFFF")
         self.stackedWidget.setAutoFillBackground(True)
 
-
-################################################################################
 
         self.main_menu = QtWidgets.QWidget()
         self.main_menu.setObjectName("main_menu")
@@ -85,7 +172,6 @@ class Ui_Form(object):
                                         "  color: #ee7838;")
         self.pushButton_5.setObjectName("pushButton_5")
         self.pushButton_5.clicked.connect(self.on_clicked_create_guide)
-        # background-color: #006898
         self.pushButton_5.show()
         self.pushButton_7 = hover_button(self.main_menu)
         self.pushButton_7.setGeometry(QtCore.QRect(425, 635, 350, 40))
@@ -148,7 +234,8 @@ class Ui_Form(object):
         self.pushButton_3.clicked.connect(self.on_clicked_view_schedule)
         self.pushButton_3.show()
         self.stackedWidget.addWidget(self.main_menu)
-        ########################################################################
+
+
         self.view_staff = QtWidgets.QWidget()
         self.view_staff.setObjectName("view_staff")
         self.view_staff.setStyleSheet("background-color:#FFFFFF")
@@ -224,7 +311,8 @@ class Ui_Form(object):
         self.main_label_4.setObjectName("main_label_4")
         self.stackedWidget.addWidget(self.view_staff)
         self.load_staff_data()
-        ########################################################################
+
+
         self.create_guide = QtWidgets.QWidget()
         self.create_guide.setStyleSheet("color: #ee7838;\n"
                                         "background-color:#FFFFFF")
@@ -516,7 +604,8 @@ class Ui_Form(object):
         self.overnight_group.addButton(self.radioButton_36)
         self.verticalLayout_3.addLayout(self.horizontalLayout_19)
         self.stackedWidget.addWidget(self.create_guide)
-        ########################################################################
+
+
         self.create_driver = QtWidgets.QWidget()
         self.create_driver.setStyleSheet("color: #ee7838;\n"
                                          "background-color:#FFFFFF")
@@ -562,8 +651,6 @@ class Ui_Form(object):
                                     "  background-color: #006898;\n"
                                     "  color: #ee7838;")
         self.submit_2.setObjectName("submit")
-        # self.submit_2.clicked.connect(self.create_new_driver)
-        # self.submit_2.show()
         self.verticalWidget_7 = QtWidgets.QWidget(self.create_driver)
         self.verticalWidget_7.setGeometry(QtCore.QRect(325, 440, 111, 131))
         self.verticalWidget_7.setObjectName("verticalWidget_7")
@@ -904,7 +991,8 @@ class Ui_Form(object):
             self.horizontalLayout_Seniority_5)
 
         self.stackedWidget.addWidget(self.create_driver)
-        ########################################################################
+
+
         self.view_schedule = QtWidgets.QWidget()
         self.view_schedule.setObjectName("view_schedule")
         self.view_schedule.setStyleSheet("background-color:#FFFFFF")
@@ -965,7 +1053,7 @@ class Ui_Form(object):
         self.submit_date_range.clicked.connect(self.submit_dates)
         self.stackedWidget.addWidget(self.view_schedule)
 
-        ########################################################################
+
         self.create_new_schedule = QtWidgets.QWidget()
         self.create_new_schedule.setStyleSheet("color: #ee7838;\n"
                                                "background-color:#FFFFFF")
@@ -1023,6 +1111,13 @@ class Ui_Form(object):
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):
+        """Translates the string properties of the form
+
+        Parameters
+        ----------
+        Form: QWidget
+            A QWidget object created in the run file
+        """
 
         Form.setWindowTitle(
             QtWidgets.QApplication.translate("Form", "Form", None, 0))
@@ -1199,16 +1294,27 @@ class Ui_Form(object):
             QtWidgets.QApplication.translate("Form", "Submit", None, 0))
 
     def on_clicked_view_staff(self):
+        """Switches the active widget to the View Staff widget"""
+
         self.load_staff_data()
         self.stackedWidget.setCurrentIndex(1)
 
     def on_clicked_create_guide(self):
+        """Switches the active widget to the Create Guide widget"""
+
         self.stackedWidget.setCurrentIndex(2)
 
     def on_clicked_create_driver(self):
+        """Switches the active widget to the Create Driver widget"""
+
         self.stackedWidget.setCurrentIndex(3)
 
     def on_clicked_view_schedule(self):
+        """Switches the active widget to the View Schedule widget
+
+        This method is also responsible for populating the vertical and
+        horizontal headers before the data is loaded
+        """
 
         row_number = 0
 
@@ -1227,12 +1333,26 @@ class Ui_Form(object):
         self.stackedWidget.setCurrentIndex(4)
 
     def on_clicked_create_new_schedule(self):
+        """Switches the active widget to the Create Schedule widget"""
+
         self.stackedWidget.setCurrentIndex(5)
 
     def back_page(self):
+        """Switches the active widget to the Main Page widget when the back
+        button on any other widget is clicked
+        """
+
         self.stackedWidget.setCurrentIndex(0)
 
     def create_new_guide(self):
+        """Submits the values gathered from the Create Guide widget fields to the
+        guide table in staff.db and switches the active widget to View Staff
+
+        Method Calls
+        ------------
+            -on_clicked_view_staff()
+        """
+
         name = self.guide_name.toPlainText()
         has_class_IV = self.class_IV.isChecked()
         four_hour_guide = self.can_guide_four_hour.isChecked()
@@ -1318,6 +1438,14 @@ class Ui_Form(object):
         self.on_clicked_view_staff()
 
     def create_new_driver(self):
+        """Submits the values gathered from the Create Driver widget fields to the
+        driver table in staff.db and switches the active widget to View Staff
+
+        Method Calls
+        ------------
+            -on_clicked_view_staff()
+        """
+
         name = self.driver_name.toPlainText()
         has_class_IV = self.class_IVDriver.isChecked()
         four_hour_drive = self.can_drive_four_hour.isChecked()
@@ -1407,6 +1535,13 @@ class Ui_Form(object):
         self.on_clicked_view_staff()
 
     def submit_dates(self):
+        """Submits the start and end date values gathered from the View Schedule
+        widget and passes them to the load_schedule_data() method
+
+        Method Calls
+        ------------
+            -load_schedule_data()
+        """
 
         temp_date = self.start_date.dateTime()
         start = self.start_date.textFromDateTime(temp_date)
@@ -1415,6 +1550,9 @@ class Ui_Form(object):
         self.load_schedule_data(start, end)
 
     def load_staff_data(self):
+        """Queries the driver and guide tables in staff.db and loads the gathered
+        data into tables in the View Staff widget
+        """
 
         guide_header = ["name",
                         "in_stream",
@@ -1500,13 +1638,11 @@ class Ui_Form(object):
         print("\n\n", guide_list)
 
 
-# print(QtGui.QStyleFactory.keys())
-
-        for row in range(len(guide_list)):
+        for row, dict in enumerate(guide_list):
 
             self.tableWidget.insertRow(row)
 
-            for column in range(len(guide_header)):
+            for column, dict in enumerate(guide_header):
 
                 item = QtWidgets.QTableWidgetItem(
                     str(guide_list[row][guide_header[column]]))
@@ -1518,15 +1654,27 @@ class Ui_Form(object):
         driver_object = session_driver.query(manage_staff.driver.driver)
         driver_list = [u.__dict__ for u in driver_object.all()]
 
-        for row in range(len(driver_list)):
+        for row, dict in enumerate(driver_list):
             self.tableWidget_5.insertRow(row)
-            for column in range(len(driver_list[row]) - 1):
-
-                self.tableWidget_5.setItem(row, column, QtWidgets.QTableWidgetItem(
-                    str(driver_list[row][driver_header[column]])))
+            for index, column in enumerate(driver_list[row]):
+                if index < 24:
+                    self.tableWidget_5.setItem(row, index, QtWidgets.QTableWidgetItem(
+                        str(driver_list[row][driver_header[index]])))
 
     def load_schedule_data(self, start_date, end_date):
+        """Queries the schedule table in trips.db for rows that fall in between the
+        start and end dates and loads the gathered data into a table in the
+        View Staff widget
 
+        Parameters
+        ----------
+            start_date: str
+                A string representation of the first date to be queried,
+                formatted as YYYY-MM-DD
+            end_date: str
+                A string representation of the last date to be queried,
+                formatted as YYYY-MM-DD
+        """
         connection_trips = sqlite3.connect('trips.db')
         c_trips = connection_trips.cursor()
 
@@ -1599,6 +1747,11 @@ class Ui_Form(object):
         c_trips.close()
 
     def scrape_excel_sheet(self):
+        """Creates a scraper object and uses it to extract data from a file path
+        submitted by the user and passes the object and its data to the methods
+        necesary to process the data
+        """
+
         path = self.file_path.toPlainText()
 
         excel_data = excel_scraper.scraper.excel_scraper(path)

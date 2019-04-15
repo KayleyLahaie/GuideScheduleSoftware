@@ -61,9 +61,7 @@ def copy_schedule_role(session_guide, session_driver, session_schedule,trips,
     for trip_name in trips:
         if trip_name in num_guides:
             if(num_guides[trip_name] == max_guides[create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]]):
-                #enumerator
-                for role in range(len(create_schedule.schedule_dictionaries.role_switch)):
-
+                for role, value in enumerate(create_schedule.schedule_dictionaries.role_switch):
                     if create_schedule.schedule_dictionaries.role_switch[role]+create_schedule.schedule_dictionaries.trip_types[
                                 create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip_name]
                             ] in trip_role_assignment:

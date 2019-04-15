@@ -64,8 +64,8 @@ class Ui_not_enough_guides_popup(object):
         self.comboBox.addItem("Unknown")
 
         num_temp_guides = manage_staff.staff_util.get_total_temp_guides()
-        #enumerator
-        for x in range(len(num_temp_guides)):
+
+        for x in enumerate(num_temp_guides):
             self.comboBox.addItem(num_temp_guides[x]['name'])
 
         self.or_label = QtWidgets.QLabel(not_enough_guides_popup)

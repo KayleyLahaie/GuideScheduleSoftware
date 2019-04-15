@@ -31,7 +31,7 @@ def get_guide_priority_matrix(session_guide):
     guide_object = session_guide.query(manage_staff.guide.guide)
     guide_list = [u.__dict__ for u in guide_object.all()]
 
-    for num_guides in range(len(guide_list)):
+    for num_guides, value in enumerate(guide_list):
         if guide_list[num_guides]['in_stream'] == 'true':
             guide_name = guide_list[num_guides]['name']
             current_guide_priorities = []
@@ -48,9 +48,8 @@ def get_guide_priority_matrix(session_guide):
             #g(i)
             g_of_i = []
 
-            #enumerators
-            for x in range(len(create_schedule.schedule_dictionaries.trip_types)):
-                for y in range(len(create_schedule.schedule_dictionaries.guide_roles)):
+            for x, value in enumerate(create_schedule.schedule_dictionaries.trip_types):
+                for y, value in enumerate(create_schedule.schedule_dictionaries.guide_roles):
                     #x
                     times_role_held= []
                     #y
@@ -59,7 +58,7 @@ def get_guide_priority_matrix(session_guide):
                     times_trip_worked = []
                     #b
                     total_times_trip_worked = []
-                    for z in range(len(create_schedule.schedule_dictionaries.time_types)):
+                    for z, value in enumerate(create_schedule.schedule_dictionaries.time_types):
 
                         times_role_held.append(
                             guide_list[num_guides][create_schedule.schedule_dictionaries.guide_roles[y]
@@ -70,11 +69,11 @@ def get_guide_priority_matrix(session_guide):
                         total_times_role_held.append(0)
                         total_times_trip_worked.append(0)
 
-                        for guides in range(len(guide_list)):
+                        for guides, value in enumerate(guide_list):
                             total_times_role_held[z] += guide_list[guides][create_schedule.schedule_dictionaries.guide_roles[y]
                                                         +create_schedule.schedule_dictionaries.time_types[z]
                                                         +create_schedule.schedule_dictionaries.trip_types[x]]
-                            for num_roles in range(len(create_schedule.schedule_dictionaries.guide_roles)):
+                            for num_roles, value in enumerate(create_schedule.schedule_dictionaries.guide_roles):
                                 total_times_trip_worked[z] += guide_list[guides][create_schedule.schedule_dictionaries.guide_roles[num_roles]
                                                                 +create_schedule.schedule_dictionaries.time_types[z]
                                                                 +create_schedule.schedule_dictionaries.trip_types[x]]
@@ -86,7 +85,7 @@ def get_guide_priority_matrix(session_guide):
                             role_held_quotient.append(1)
 
                         times_trip_worked.append(0)
-                        for num_roles in range(len(create_schedule.schedule_dictionaries.guide_roles)):
+                        for num_roles, value in enumerate(create_schedule.schedule_dictionaries.guide_roles):
                             times_trip_worked[z] += guide_list[num_guides][create_schedule.schedule_dictionaries.guide_roles[num_roles]
                                                     +create_schedule.schedule_dictionaries.time_types[z]
                             +create_schedule.schedule_dictionaries.trip_types[x]]
@@ -123,7 +122,7 @@ def get_guide_priority_matrix(session_guide):
             print("PRIORITIES FOR ", guide_name,": ", current_guide_priorities)
             guide_dict[guide_name] = current_guide_priorities
 
-    for guide in range(len(guide_list)):
+    for guide, value in enumerate(guide_list):
         guide_name = guide_list[guide]['name']
 
     return guide_dict
@@ -314,12 +313,12 @@ def calculate_priority(session_driver, driver_priority_matrix,
         print("\n")
         print("CLASS IV DRIVER NOT NEEDED")
 
-        for index in range(len(driver_ordered_name)):
+        for index, value in enumerate(driver_ordered_name):
             seniority = drivers_ordered_seniority[index]
             if seniority == 1:
                 calculated_priority_drivers.append(driver_ordered_name[index])
 
-        for index in range(len(driver_ordered_name)):
+        for index, value in enumerate(driver_ordered_name):
             seniority = drivers_ordered_seniority[index]
 
             if seniority == 0:
@@ -334,7 +333,7 @@ def calculate_priority(session_driver, driver_priority_matrix,
         print("\n")
         print("CLASS IV DRIVER NEEDED")
 
-        for index in range(len(driver_ordered_name)):
+        for index, value in enumerate(driver_ordered_name):
             driver_object = session_driver.query(manage_staff.driver.driver).filter(
                                     manage_staff.driver.driver.name == driver_ordered_name[index]
                                )
@@ -423,7 +422,7 @@ def get_driver_priority_matrix(session_driver):
     driver_list = [u.__dict__ for u in driver_object.all()]
 
 
-    for num_drivers in range(len(driver_list)):
+    for num_drivers, value in enumerate(driver_list):
 
         if driver_list[num_drivers]['in_stream'] == 'true':
             driver_name = driver_list[num_drivers]['name']
@@ -445,13 +444,13 @@ def get_driver_priority_matrix(session_driver):
             d_of_i = []
 
 
-            for x in range(len(create_schedule.schedule_dictionaries.trip_types)):
+            for x, value in enumerate(create_schedule.schedule_dictionaries.trip_types):
                 #a
                 times_trip_worked = []
                 #b
                 total_times_trip_worked = []
 
-                for z in range(len(create_schedule.schedule_dictionaries.time_types)):
+                for z, value in enumerate(create_schedule.schedule_dictionaries.time_types):
                     total_times_trip_worked.append(0)
                     times_trip_worked.append(0)
                     times_trip_worked[z] = driver_list[num_drivers]["driven_"
@@ -459,7 +458,7 @@ def get_driver_priority_matrix(session_driver):
                                                 +create_schedule.schedule_dictionaries.trip_types[x]
                                             ]
 
-                    for drivers in range(len(driver_list)):
+                    for drivers, value in enumerate(driver_list):
                         total_times_trip_worked[z] += driver_list[drivers]["driven_"
                                                             +create_schedule.schedule_dictionaries.time_types[z]
                                                             +create_schedule.schedule_dictionaries.trip_types[x]]
@@ -496,8 +495,7 @@ def get_driver_priority_matrix(session_driver):
             print("PRIORITIES FOR ", driver_name,": ", current_driver_priorities)
             driver_dict[driver_name] = (current_driver_priorities, s_of_i)
 
-    #enumerator
-    for driver in range(len(driver_list)):
+    for driver, value in enumerate(driver_list):
         driver_name = driver_list[driver]['name']
 
     return driver_dict

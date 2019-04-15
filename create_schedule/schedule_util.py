@@ -16,7 +16,7 @@ def calculate_previous_date(current_date):
         A string representing the date previous to the inputted date in the
         format YYYY-MM-DD
     """
-    
+
     year = int(current_date[0:4])
     month = int(current_date[5:7])
     day = int(current_date[8:10])

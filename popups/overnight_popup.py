@@ -100,7 +100,7 @@ class Ui_overnight_popup(object):
 
             self.comboBoxes[n].addItem("Choose Guide...")
 
-            for m in range(len(guides_available)):
+            for m in enumerate(guides_available):
                 self.comboBoxes[n].addItem(guides_available[m])
 
             self.labels[n] = QtWidgets.QLabel(overnight_popup)
@@ -125,7 +125,7 @@ class Ui_overnight_popup(object):
 
             self.safety_name.addItem("Choose Guide...")
 
-            for m in range(len(guides_available)):
+            for m in enumerate(guides_available):
                 self.safety_name.addItem(guides_available[m])
 
             self.safety_label = QtWidgets.QLabel(overnight_popup)

@@ -181,6 +181,7 @@ def add_new_date(current_date):
                     if role <= 4:
 
                         manage_staff.staff_util.update_num_trips_guide(
+                                                    session_guide, session_schedule,
                                                     staff_member,
                                                     create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip],
                                                     -1,
@@ -189,6 +190,7 @@ def add_new_date(current_date):
                                                 )
                     else:
                         manage_staff.staff_util.update_num_trips_driver(
+                                                    session_driver, session_schedule,
                                                     staff_member,
                                                     create_schedule.schedule_dictionaries.max_guides_trip_swictch[trip],
                                                     -1, current_date)
