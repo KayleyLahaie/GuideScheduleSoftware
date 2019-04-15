@@ -30,6 +30,7 @@ Where
     
     m: The number of role types 
 
+    x: The ID number of the trip being scheduled
 
 The priorities for the drivers are calculated according to the following equation:
 
