@@ -24,7 +24,11 @@ Where
  
     c(i): Whether or not the guide is allowed to work this role on this trip (1 or 0)
  
-    w(i): The weight value assigned to this trip (constant)
+    w(i): The weight value assigned to this trip
+    
+    n: The number of trip types
+    
+    m: The number of role types 
 
 
 The priorities for the drivers are calculated according to the following equation:
@@ -35,14 +39,16 @@ The priorities for the drivers are calculated according to the following equatio
 
 Where
 
-    Tg: Number of times the guide has worked any role on this trip
+    Tds: Number of times the driver has worked on this trip throughout the summer
  
-    Ta: Number of times all guides have worked any role on this trip
+    Tas: Number of times all drivers have worked on this trip throughout the summer
  
-    Rg: Number of times the guide has worked this role on any trip
+    Tdp: Number of times the driver has worked on this trip since the start of the most recent period
  
-    Ra: Number of times all guides have worked this role on any trip
+    Tap: Number of times all drivers have worked on this trip since the start of the most recent period
  
-    c(i): Whether or not the guide is allowed to work this role on this trip (1 or 0)
+    c(i): Whether or not the driver is allowed to work this trip (1 or 0)
  
-    w(i): The weight value assigned to this trip (constant)
+    w(i): The weight value assigned to this trip
+    
+    n: The number of trip types
