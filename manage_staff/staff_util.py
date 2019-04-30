@@ -360,7 +360,7 @@ def get_total_drivers(session_driver):
     all_drivers_list = [u.__dict__ for u in all_drivers_object.all()]
     return all_drivers_list
 
-def get_total_temp_drivers():
+def get_total_temp_drivers(session_driver):
     """Creates a list of all of the drivers currently stored in the driver table
     that are not in the stream
 
@@ -376,7 +376,7 @@ def get_total_temp_drivers():
         database on each driver
     """
 
-    temp_drivers_object = session_guide.query(manage_staff.driver.driver).filter(
+    temp_drivers_object = session_driver.query(manage_staff.driver.driver).filter(
                             manage_staff.driver.driver.in_stream.in_(['false']))
 
     temp_drivers_list = [u.__dict__ for u in temp_drivers_object.all()]

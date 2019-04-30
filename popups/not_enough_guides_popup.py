@@ -63,7 +63,7 @@ class Ui_not_enough_guides_popup(object):
         self.comboBox.addItem("Choose Guide...")
         self.comboBox.addItem("Unknown")
 
-        num_temp_guides = manage_staff.staff_util.get_total_temp_guides()
+        num_temp_guides = manage_staff.staff_util.get_total_temp_guides(session_guide)
 
         for x in enumerate(num_temp_guides):
             self.comboBox.addItem(num_temp_guides[x]['name'])

@@ -351,7 +351,7 @@ def calculate_priority(session_driver, driver_priority_matrix,
         return calculated_priority_drivers
 
 
-def calculate_priority_class_IV(guides_ordered_name):
+def calculate_priority_class_IV(guides_ordered_name, session_guide):
     """Further refine the order that guides should be considered by moving
     guides with Class IV to the end of the list (ordered by priorities) to
     prevent all guides and drivers with Class IV licenses from being assigned

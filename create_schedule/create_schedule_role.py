@@ -95,7 +95,7 @@ def create_schedule_role(role, current_date, trip_role_assignment, trip,
                             class_IV = 1
 
             if class_IV == 1:
-                calculate_priority_list = get_priority.calculate_priority_class_IV(calculate_priority_list)
+                calculate_priority_list = get_priority.calculate_priority_class_IV(calculate_priority_list, session_guide)
 
     loop_controller = calculate_priority_list.copy()
 

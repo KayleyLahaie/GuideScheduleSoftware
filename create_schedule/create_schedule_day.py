@@ -12,6 +12,7 @@ from manage_staff import driver
 
 import popups
 from popups import not_enough_guides_popup
+from popups import not_enough_drivers_popup
 from popups import overnight_popup
 
 import os
@@ -180,28 +181,28 @@ def create_schedule_day(gui_window, scraper_object, current_date):
                 manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
             print("\n")
 
-    # if total_drivers_needed > len(manage_staff.staff_util.get_total_drivers()):
-#
-#        DialogBox = QtGui.QDialog()
-#        ui_guides = popups.not_enough_guides_popup.Ui_not_enough_guides_popup()
-#        ui_guides.setupUi(DialogBox, DialogBox)
-#        DialogBox.show()
-#
-#        print("shown")
-#
-#        if DialogBox.exec_():
-#            print("exec")
-#            temp_guide = ui_guides.return_temp_guide()
-#
-#            temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
-#                manage_staff.guide.guide.name.in_(
-#                    [temp_guide])).update(
-#                        {'in_stream':'true'},synchronize_session=False
-#                    )
-#
-#            session_guide.commit()
-#
-#            print("Set to true : ", session_guide.query(manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
+    if total_drivers_needed > len(manage_staff.staff_util.get_total_drivers(session_driver)):
+
+        DialogBox = QtWidgets.QDialog()
+        ui_drivers = popups.not_enough_drivers_popup.Ui_not_enough_drivers_popup()
+        ui_drivers.setupUi(DialogBox, DialogBox)
+        DialogBox.show()
+
+        print("shown")
+
+        if DialogBox.exec_():
+            print("exec")
+            temp_driver = ui_drivers.return_temp_driver()
+
+            temp_driver_object = session_driver.query(manage_staff.driver.driver).filter(
+                manage_staff.driver.driver.name.in_(
+                    [temp_driver])).update(
+                        {'in_stream':'true'},synchronize_session=False
+                    )
+
+            session_driver.commit()
+
+            print("Set to true : ", session_driver.query(manage_staff.driver.driver).filter(manage_staff.driver.driver.name.in_([temp_driver])))
 
     for trip in create_schedule.schedule_dictionaries.trip_number_switch:
 
