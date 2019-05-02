@@ -68,6 +68,8 @@ class Ui_not_enough_drivers_popup(object):
         for x, y in enumerate(num_temp_drivers):
             self.comboBox.addItem(num_temp_drivers[x]['name'])
 
+        self.comboBox.currentIndexChanged.connect(self.selectionchange)
+
         self.or_label = QtWidgets.QLabel(not_enough_drivers_popup)
         self.or_label.setGeometry(QtCore.QRect(262.5, 100, 150, 50))
         self.or_label.setObjectName("or_label")
@@ -246,6 +248,24 @@ class Ui_not_enough_drivers_popup(object):
             None,
             0)
         )
+    def selectionchange(self, i):
+
+        driver_name = self.comboBox.currentText()
+        if driver_name != "Choose driver...":
+            t_f_converter = {'0':False, '1':True}
+
+            num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
+                                manage_staff.driver.driver.name == driver_name)
+
+            num_trips_list = [u.__dict__ for u in num_trips_object.all()]
+
+            self.class_IV.setChecked(t_f_converter[num_trips_list[0]['has_class_IV']])
+            self.can_drive_four_hour.setChecked(t_f_converter[num_trips_list[0]['four_hour']])
+            self.can_drive_full_day.setChecked(t_f_converter[num_trips_list[0]['full_day']])
+            self.can_drive_c_wave.setChecked(t_f_converter[num_trips_list[0]['c_wave']])
+            self.can_drive_float.setChecked(t_f_converter[num_trips_list[0]['scenic_float']])
+            self.can_drive_overnight.setChecked(t_f_converter[num_trips_list[0]['scenic_float']])
+
 
     def choose_temporary_driver(self):
         """Choose a temporary driver from a list or create a new one using the
@@ -268,7 +288,6 @@ class Ui_not_enough_drivers_popup(object):
             float_driver = self.can_drive_float.isChecked()
             overnight_driver = self.can_drive_overnight.isChecked()
 
-
             new_driver = manage_staff.driver.driver(   name = name, in_stream = 'false',
                                                     has_class_IV = has_class_IV,
                                                     four_hour = four_hour_driver,
@@ -276,11 +295,11 @@ class Ui_not_enough_drivers_popup(object):
                                                     full_day = full_day_driver,
                                                     scenic_float = float_driver,
                                                     overnight = overnight_driver,
-                                                    four_hour_seniority = 1,
-                                                    c_wave_seniority = 1,
-                                                    full_day_seniority = 1,
-                                                    scenic_float_seniority = 1,
-                                                    overnight_seniority = 1,
+                                                    four_hour_seniority = four_hour_driver,
+                                                    c_wave_seniority = c_wave_driver,
+                                                    full_day_seniority = full_day_driver,
+                                                    scenic_float_seniority = float_driver,
+                                                    overnight_seniority = overnight_driver,
                                                     driven_this_summer_four_hour = 1,
                                                     driven_this_summer_c_wave = 1,
                                                     driven_this_summer_full_day = 1,
@@ -300,6 +319,23 @@ class Ui_not_enough_drivers_popup(object):
             self.DialogBox.accept()
 
         elif self.comboBox.currentText() != "Choose driver...":
+
+            has_class_IV = self.class_IV.isChecked()
+            four_hour_driver = self.can_drive_four_hour.isChecked()
+            full_day_driver = self.can_drive_full_day.isChecked()
+            c_wave_driver = self.can_drive_c_wave.isChecked()
+            float_driver = self.can_drive_float.isChecked()
+            overnight_driver = self.can_drive_overnight.isChecked()
+
+
+            num_trips_object = session_driver.query(manage_staff.driver.driver).filter(
+                                manage_staff.driver.driver.name == self.comboBox.currentText()).update(
+                                    {"has_class_IV":has_class_IV,
+                                    "four_hour":four_hour_driver, "c_wave":c_wave_driver,
+                                    "full_day":full_day_driver, "scenic_float":float_driver,
+                                    "overnight":overnight_driver}
+                                    ,synchronize_session=False)
+            session_driver.commit()
 
             self.temp_driver = self.comboBox.currentText()
             self.DialogBox.accept()

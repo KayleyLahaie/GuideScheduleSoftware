@@ -156,7 +156,7 @@ class Ui_Form(object):
         self.white = QtGui.QColor.fromRgb(255, 255, 255, 0.5)
 
         self.background = QtWidgets.QLabel(self.main_menu)
-        self.background.setPixmap(QtGui.QPixmap('background4.png'))
+        self.background.setPixmap(QtGui.QPixmap('resources/background4.png'))
         self.background.setGeometry(QtCore.QRect(0, 0, 1200, 795))
 
         self.pushButton_5 = hover_button(self.main_menu)
@@ -241,7 +241,7 @@ class Ui_Form(object):
         self.view_staff.setStyleSheet("background-color:#FFFFFF")
 
         self.background = QtWidgets.QLabel(self.view_staff)
-        self.background.setPixmap(QtGui.QPixmap('background.jpg'))
+        self.background.setPixmap(QtGui.QPixmap('resources/background.jpg'))
         self.background.setGeometry(QtCore.QRect(0, 0, 1200, 795))
 
         self.tableWidget = QtWidgets.QTableWidget(self.view_staff)
@@ -319,7 +319,7 @@ class Ui_Form(object):
         self.create_guide.setObjectName("create_guide")
 
         self.background = QtWidgets.QLabel(self.create_guide)
-        self.background.setPixmap(QtGui.QPixmap('background.jpg'))
+        self.background.setPixmap(QtGui.QPixmap('resources/background.jpg'))
         self.background.setGeometry(QtCore.QRect(0, 0, 1200, 795))
 
         self.container = QtWidgets.QLabel(self.create_guide)
@@ -612,7 +612,7 @@ class Ui_Form(object):
         self.create_driver.setObjectName("create_driver")
 
         self.background = QtWidgets.QLabel(self.create_driver)
-        self.background.setPixmap(QtGui.QPixmap('background.jpg'))
+        self.background.setPixmap(QtGui.QPixmap('resources/background.jpg'))
         self.background.setGeometry(QtCore.QRect(0, 0, 1200, 795))
 
         self.container = QtWidgets.QLabel(self.create_driver)
@@ -998,7 +998,7 @@ class Ui_Form(object):
         self.view_schedule.setStyleSheet("background-color:#FFFFFF")
 
         self.background = QtWidgets.QLabel(self.view_schedule)
-        self.background.setPixmap(QtGui.QPixmap('background.jpg'))
+        self.background.setPixmap(QtGui.QPixmap('resources/background.jpg'))
         self.background.setGeometry(QtCore.QRect(0, 0, 1200, 795))
 
         self.tableWidget_2 = QtWidgets.QTableWidget(self.view_schedule)
@@ -1060,7 +1060,7 @@ class Ui_Form(object):
         self.create_new_schedule.setObjectName("create_new_schedule")
 
         self.background = QtWidgets.QLabel(self.create_new_schedule)
-        self.background.setPixmap(QtGui.QPixmap('background.jpg'))
+        self.background.setPixmap(QtGui.QPixmap('resources/background.jpg'))
         self.background.setGeometry(QtCore.QRect(0, 0, 1200, 795))
 
         self.container = QtWidgets.QLabel(self.create_new_schedule)
@@ -1068,14 +1068,32 @@ class Ui_Form(object):
                                      "  border-radius: 5%;\n")
         self.container.setGeometry(QtCore.QRect(235, 262.5, 700, 250))
 
+        self.drag_and_drop = QtWidgets.QLabel(self.create_new_schedule)
+        self.drag_and_drop.setStyleSheet("border: 2px dashed grey;")
+        self.container.setGeometry(QtCore.QRect(250, 275, 600, 225))
+
         self.file_path = QtWidgets.QTextEdit(self.create_new_schedule)
-        self.file_path.setGeometry(QtCore.QRect(450, 350, 356, 31))
+        self.file_path.setGeometry(QtCore.QRect(450, 350, 250, 31))
         self.file_path.setStyleSheet("background-color: #FFFFFF")
         self.file_path.setObjectName("file_path")
         self.label = QtWidgets.QLabel(self.create_new_schedule)
         self.label.setGeometry(QtCore.QRect(350, 350, 91, 31))
         self.label.setObjectName("label")
         self.label.setStyleSheet("background-color: rgba(255,255,255,0)")
+        self.choose_file = QtWidgets.QPushButton(self.create_new_schedule)
+        self.choose_file.setGeometry(QtCore.QRect(710, 350, 93, 28))
+        self.choose_file.setStyleSheet("  border: none;\n"
+                                    "  padding: 0.5%;\n"
+                                    "  cursor: pointer;\n"
+                                    "  font-family: special_font;\n"
+                                    "  font-size: 130%;\n"
+                                    "  border-radius: 3%;\n"
+                                    "  opacity: 0.9;\n"
+                                    "  background-color: #006898;\n"
+                                    "  color: #ee7838;")
+        self.choose_file.setObjectName("choose_file")
+        self.choose_file.clicked.connect(self.choose_new_file)
+        self.choose_file.show()
         self.submit_3 = QtWidgets.QPushButton(self.create_new_schedule)
         self.submit_3.setGeometry(QtCore.QRect(710, 410, 93, 28))
         self.submit_3.setStyleSheet("  border: none;\n"
@@ -1290,6 +1308,8 @@ class Ui_Form(object):
                                                                 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;\"><br /></p></body></html>", None, 0))
         self.label.setText(QtWidgets.QApplication.translate(
             "Form", "<html><head/><body><p><span style=\" font-size:12pt;\">File Path</span></p></body></html>", None, 0))
+        self.choose_file.setText(
+            QtWidgets.QApplication.translate("Form", "Choose File", None, 0))
         self.submit_3.setText(
             QtWidgets.QApplication.translate("Form", "Submit", None, 0))
 
@@ -1779,3 +1799,7 @@ class Ui_Form(object):
         ), create_schedule.schedule_util.calculate_previous_date(date))
 
         self.on_clicked_view_schedule()
+
+    def choose_new_file(self):
+        #file_path = QtWidgets.QFileDialog.getOpenFileName(parent: PySide2.QtWidgets.QWidget = None, caption: str = 'Open File', dir: str = 'C:\\Downloads', filter: str = 'Excel Spreadsheet (*.xlsx)', selectedFilter: str = '')
+        #self.file_path.setText(file_path)

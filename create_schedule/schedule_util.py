@@ -69,9 +69,9 @@ def get_current_period(current_date):
     month = int(current_date[5:7])
     day = int(current_date[8:10])
     current_date_object = datetime.date(year, month, day)
-    difference =  season_start_date_object - current_date_object
-    current_period = math.floor((-difference.days)/7)
-
+    difference =  current_date_object - season_start_date_object
+    print("DIFFERENCE: ", difference)
+    current_period = math.floor((difference.days+365)/7)
     print("CURRENT PERIOD: ", current_period)
     print("#########################################################\n")
 

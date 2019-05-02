@@ -66,6 +66,7 @@ def create_schedule_day(gui_window, scraper_object, current_date):
 
     current_date_object = create_new_schedule.add_new_date(current_date)
     temp_guide = 0
+    temp_driver = 0
     print("\n")
     print("CREATING SHEDULE FOR ", current_date)
     trips = scraper_object.get_day(current_date)
@@ -160,49 +161,63 @@ def create_schedule_day(gui_window, scraper_object, current_date):
         total_drivers_needed += num_drivers[x]
 
     if total_guides_needed > len(manage_staff.staff_util.get_total_guides(session_guide)):
-        DialogBox = QtWidgets.QDialog()
-        ui_guides = popups.not_enough_guides_popup.Ui_not_enough_guides_popup()
-        ui_guides.setupUi(DialogBox, DialogBox)
-        DialogBox.show()
 
-        if DialogBox.exec_():
-            temp_guide = ui_guides.return_temp_guide()
+        num_times = total_guides_needed - len(manage_staff.staff_util.get_total_guides(session_guide))
+        print("TEMP GUIDES NEEDED: ", num_times)
 
-            temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
-                manage_staff.guide.guide.name.in_(
-                    [temp_guide])).update(
-                        {'in_stream': 'true'}, synchronize_session=False
-            )
+        for i in range(num_times):
 
-            session_guide.commit()
+            print("CHOOSING TEMP GUIDE ",i)
+            DialogBox = QtWidgets.QDialog()
+            ui_guides = popups.not_enough_guides_popup.Ui_not_enough_guides_popup()
+            ui_guides.setupUi(DialogBox, DialogBox)
+            DialogBox.show()
 
-            print("\n")
-            print("TEMP GUIDE INSTREAM SET TO TRUE: ", session_guide.query(
-                manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
-            print("\n")
+            if DialogBox.exec_():
+                temp_guide = ui_guides.return_temp_guide()
+
+                temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
+                    manage_staff.guide.guide.name.in_(
+                        [temp_guide])).update(
+                            {'in_stream': 'true'}, synchronize_session=False
+                )
+
+                session_guide.commit()
+
+                print("\n")
+                print("TEMP GUIDE INSTREAM SET TO TRUE: ", session_guide.query(
+                    manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
+                print("\n")
 
     if total_drivers_needed > len(manage_staff.staff_util.get_total_drivers(session_driver)):
 
-        DialogBox = QtWidgets.QDialog()
-        ui_drivers = popups.not_enough_drivers_popup.Ui_not_enough_drivers_popup()
-        ui_drivers.setupUi(DialogBox, DialogBox)
-        DialogBox.show()
+        num_times = total_drivers_needed - len(manage_staff.staff_util.get_total_drivers(session_driver))
+        print("TEMP DRIVERS NEEDED: ", num_times)
 
-        print("shown")
+        for i in range(num_times):
 
-        if DialogBox.exec_():
-            print("exec")
-            temp_driver = ui_drivers.return_temp_driver()
+            print("CHOOSING TEMP DRIVER ",i)
 
-            temp_driver_object = session_driver.query(manage_staff.driver.driver).filter(
-                manage_staff.driver.driver.name.in_(
-                    [temp_driver])).update(
-                        {'in_stream':'true'},synchronize_session=False
-                    )
+            DialogBox = QtWidgets.QDialog()
+            ui_drivers = popups.not_enough_drivers_popup.Ui_not_enough_drivers_popup()
+            ui_drivers.setupUi(DialogBox, DialogBox)
+            DialogBox.show()
 
-            session_driver.commit()
+            print("shown")
 
-            print("Set to true : ", session_driver.query(manage_staff.driver.driver).filter(manage_staff.driver.driver.name.in_([temp_driver])))
+            if DialogBox.exec_():
+                print("exec")
+                temp_driver = ui_drivers.return_temp_driver()
+
+                temp_driver_object = session_driver.query(manage_staff.driver.driver).filter(
+                    manage_staff.driver.driver.name.in_(
+                        [temp_driver])).update(
+                            {'in_stream':'true'},synchronize_session=False
+                        )
+
+                session_driver.commit()
+
+                print("Set to true : ", session_driver.query(manage_staff.driver.driver).filter(manage_staff.driver.driver.name.in_([temp_driver])))
 
     for trip in create_schedule.schedule_dictionaries.trip_number_switch:
 
@@ -269,7 +284,33 @@ def create_schedule_day(gui_window, scraper_object, current_date):
         temp_guide_object = session_guide.query(manage_staff.guide.guide).filter(
             manage_staff.guide.guide.name.in_(
                 [temp_guide])).update(
-            {'in_stream': 'false'}, synchronize_session=False
+                    {'in_stream': 'false',
+                    'tl_this_summer_four_hour':0,'tl_this_summer_c_wave':0,
+                    'tl_this_summer_full_day':0,'tl_this_summer_scenic_float':0,
+                    'tl_this_summer_overnight':0,'tl_this_period_four_hour':0,
+                    'tl_this_period_c_wave':0,'tl_this_period_full_day':0,
+                    'tl_this_period_scenic_float':0,'tl_this_period_overnight':0,
+                    'guided_this_summer_four_hour':0,
+                    'guided_this_summer_c_wave':0,
+                    'guided_this_summer_full_day':0,
+                    'guided_this_summer_scenic_float':0,
+                    'guided_this_summer_overnight':0,
+                    'guided_this_period_four_hour':0,
+                    'guided_this_period_c_wave':0,
+                    'guided_this_period_full_day':0,
+                    'guided_this_period_scenic_float':0,
+                    'guided_this_period_overnight':0,
+                    'safety_this_summer_four_hour':0,
+                    'safety_this_summer_c_wave':0,
+                    'safety_this_summer_full_day':0,
+                    'safety_this_summer_scenic_float':0,
+                    'safety_this_summer_overnight':0,
+                    'safety_this_period_four_hour':0,
+                    'safety_this_period_c_wave':0,
+                    'safety_this_period_full_day':0,
+                    'safety_this_period_scenic_float':0,
+                    'safety_this_period_overnight':0}
+                    , synchronize_session=False
         )
 
         session_guide.commit()
@@ -278,17 +319,28 @@ def create_schedule_day(gui_window, scraper_object, current_date):
             manage_staff.guide.guide).filter(manage_staff.guide.guide.name.in_([temp_guide])))
         print("\n")
 
-        #   if temp_driver != 0:
-        #
-        #        temp_driver_object = session_driver.query(manage_staff.driver.driver).filter(
-        #                                manage_staff.driver.driver.name.in_(
-        #                                    [temp_driver])).update(
-        #                                        {'in_stream':'false'},synchronize_session=False
-        #                                    )
-        #
-        #        session_driver.commit()
-        #
-        #        print("TEMP DRIVER RETURNED TO FALSE: ", session_driver.query(manage_staff.driver.driver).filter(manage_staff.driver.driver.name.in_([temp_driver])))
+    if temp_driver != 0:
+
+        temp_driver_object = session_driver.query(manage_staff.driver.driver).filter(
+            manage_staff.driver.driver.name.in_(
+                [temp_driver])).update(
+                    {'in_stream': 'false', 'driven_this_summer_four_hour':0,
+                    'driven_this_summer_c_wave':0,
+                    'driven_this_summer_full_day':0,
+                    'driven_this_summer_scenic_float':0,
+                    'driven_this_summer_overnight':0,
+                    'driven_this_period_four_hour':0,
+                    'driven_this_period_c_wave':0,
+                    'driven_this_period_full_day':0,
+                    'driven_this_period_scenic_float':0,
+                    'driven_this_period_overnight':0}, synchronize_session=False
+                )
+
+        session_driver.commit()
+        print("\n")
+        print("TEMP GUIDE INSTREAM RETURNED TO FALSE: ", session_driver.query(
+            manage_staff.driver.driver).filter(manage_staff.driver.driver.name.in_([temp_driver])))
+        print("\n")
 
         # os.remove('trips_backup.db')
         # os.remove('staff_backup.db')

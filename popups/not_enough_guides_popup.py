@@ -65,8 +65,11 @@ class Ui_not_enough_guides_popup(object):
 
         num_temp_guides = manage_staff.staff_util.get_total_temp_guides(session_guide)
 
-        for x in enumerate(num_temp_guides):
+        for x,y in enumerate(num_temp_guides):
+            print(x)
             self.comboBox.addItem(num_temp_guides[x]['name'])
+
+        self.comboBox.currentIndexChanged.connect(self.selectionchange)
 
         self.or_label = QtWidgets.QLabel(not_enough_guides_popup)
         self.or_label.setGeometry(QtCore.QRect(262.5, 100, 150, 50))
@@ -383,6 +386,34 @@ class Ui_not_enough_guides_popup(object):
             0)
         )
 
+    def selectionchange(self, i):
+
+        guide_name = self.comboBox.currentText()
+        if guide_name != "Choose Guide...":
+            t_f_converter = {'0':False, '1':True}
+
+            num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
+                                manage_staff.guide.guide.name == guide_name)
+
+            num_trips_list = [u.__dict__ for u in num_trips_object.all()]
+
+            self.class_IV.setChecked(t_f_converter[num_trips_list[0]['has_class_IV']])
+            self.can_guide_four_hour.setChecked(t_f_converter[num_trips_list[0]['guide_four_hour']])
+            self.can_guide_full_day.setChecked(t_f_converter[num_trips_list[0]['guide_full_day']])
+            self.can_guide_c_wave.setChecked(t_f_converter[num_trips_list[0]['guide_c_wave']])
+            self.can_guide_float.setChecked(t_f_converter[num_trips_list[0]['guide_scenic_float']])
+            self.can_guide_overnight.setChecked(t_f_converter[num_trips_list[0]['guide_overnight']])
+            self.can_Tl_four_hour.setChecked(t_f_converter[num_trips_list[0]['tl_four_hour']])
+            self.can_Tl_full_day.setChecked(t_f_converter[num_trips_list[0]['tl_full_day']])
+            self.can_Tl_c_wave.setChecked(t_f_converter[num_trips_list[0]['tl_c_wave']])
+            self.can_Tl_float.setChecked(t_f_converter[num_trips_list[0]['tl_scenic_float']])
+            self.can_Tl_overnight.setChecked(t_f_converter[num_trips_list[0]['tl_overnight']])
+            self.can_safety_four_hour.setChecked(t_f_converter[num_trips_list[0]['safety_four_hour']])
+            self.can_safety_full_day.setChecked(t_f_converter[num_trips_list[0]['safety_full_day']])
+            self.can_safety_c_wave.setChecked(t_f_converter[num_trips_list[0]['safety_c_wave']])
+            self.can_safety_float.setChecked(t_f_converter[num_trips_list[0]['safety_scenic_float']])
+            self.can_safety_overnight.setChecked(t_f_converter[num_trips_list[0]['safety_overnight']])
+
     def choose_temporary_guide(self):
         """Choose a temporary guide from a list or create a new one using the
         fields provided
@@ -470,6 +501,43 @@ class Ui_not_enough_guides_popup(object):
             self.DialogBox.accept()
 
         elif self.comboBox.currentText() != "Choose Guide...":
+
+            has_class_IV = self.class_IV.isChecked()
+            four_hour_guide = self.can_guide_four_hour.isChecked()
+            full_day_guide = self.can_guide_full_day.isChecked()
+            c_wave_guide = self.can_guide_c_wave.isChecked()
+            float_guide = self.can_guide_float.isChecked()
+            overnight_guide = self.can_guide_overnight.isChecked()
+            four_hour = self.can_Tl_four_hour.isChecked()
+            full_day  = self.can_Tl_full_day.isChecked()
+            c_wave  = self.can_Tl_c_wave.isChecked()
+            float  = self.can_Tl_float.isChecked()
+            overnight  = self.can_Tl_overnight.isChecked()
+            four_hour_safety = self.can_safety_four_hour.isChecked()
+            full_day_safety = self.can_safety_full_day.isChecked()
+            c_wave_safety = self.can_safety_c_wave.isChecked()
+            float_safety = self.can_safety_float.isChecked()
+            overnight_safety = self.can_safety_overnight.isChecked()
+
+            num_trips_object = session_guide.query(manage_staff.guide.guide).filter(
+                                manage_staff.guide.guide.name == self.comboBox.currentText()).update(
+                                    {"name":self.comboBox.currentText(),
+                                    "has_class_IV":has_class_IV,
+                                    "tl_four_hour":four_hour, "tl_c_wave":c_wave,
+                                    "tl_full_day":full_day, "tl_scenic_float":float,
+                                    "tl_overnight":overnight,
+                                    "guide_four_hour":four_hour_guide,
+                                    "guide_c_wave":c_wave_guide,
+                                    "guide_full_day":full_day_guide,
+                                    "guide_scenic_float":float_guide,
+                                    "guide_overnight":overnight_guide,
+                                    "safety_four_hour":four_hour_safety,
+                                    "safety_c_wave":c_wave_safety,
+                                    "safety_full_day":full_day_safety,
+                                    "safety_scenic_float":float_safety,
+                                    "safety_overnight":overnight_safety}
+                                    ,synchronize_session=False)
+            session_guide.commit()
 
             self.temp_guide = self.comboBox.currentText()
             self.DialogBox.accept()
