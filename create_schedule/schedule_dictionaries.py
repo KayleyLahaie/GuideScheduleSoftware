@@ -239,3 +239,12 @@ view_staff_headers = {
     6:"Take it Easy - 1pm",
     7:"Ticket to Ride",
 }
+
+role_switch_float = {
+    0: 'trip_leader',
+    1: 'second_guide',
+    2: 'third_guide',
+    3: 'fourth_guide',
+    4: 'first_driver',
+    5: 'second_driver',
+}

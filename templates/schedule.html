@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+      *{
+        font-family: Malgun Gothic;
+        background-color: rgba(255,255,255,200);
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      table table:not(.row_header){
+        border-left: 1px solid black;
+      }
+
+      td{
+        text-align: center;
+        height: 30px;
+        width:125px;
+        border-bottom: 1px solid black;
+
+      }
+
+      .col_header{
+        display: inline-block;
+        margin-left: 100px;
+      }
+
+      .col_header td{
+        font-size: 10px;
+      }
+
+      .guide input{
+
+        color: blue;
+
+      }
+
+      .safety input{
+
+        color: red;
+
+      }
+
+      .driver input{
+
+        color: green;
+
+      }
+
+      .row_header{
+        width: 250px;
+      }
+
+      .row_header td{
+        text-align: left;
+      }
+
+      .trip_header{
+        background-color: #f5f5f5;
+      }
+
+      .container{
+        padding: 5px;
+        margin-left: 20px;
+        border: 1px solid black;
+      }
+      .hidden_button{
+
+        height: 25px;
+        width: 115px;
+        border: none;
+        background: transparent;
+
+      }
+    </style>
+</head>
+<body>
+  {% macro guide_color(name, date, role) -%}
+    {% if name is not none%}
+      <tr>
+        <td class="guide">
+          <form action="/schedule.html" method="POST">
+            <input type="hidden" name="name" value="{{ name }}">
+            <input type="hidden" name="current_date" value="{{ date }}">
+            <input type="hidden" name="role" value="{{ role }}">
+            <input type="submit" class="hidden_button" value="{{ name }}"/>
+          </form>
+        </td></tr>
+      {% endif %}
+
+  {%- endmacro %}
+
+  {% macro safety_color(name, date, role) -%}
+    {% if name is not none%}
+      <tr>
+        <td class="safety">
+          <form action="/schedule.html" method="POST">
+            <input type="hidden" name="name" value="{{ name }}">
+            <input type="hidden" name="current_date" value="{{ date }}">
+            <input type="hidden" name="role" value="{{ role }}">
+            <input type="submit" class="hidden_button" value="{{ name }}"/>
+          </form>
+        </td></tr>
+      {% endif %}
+
+  {%- endmacro %}
+
+  {% macro driver_color(name, date, role) -%}
+  {% if name is not none%}
+      <tr>
+        <td class="driver">
+          <form action="/schedule.html" method="POST">
+            <input type="hidden" name="name" value="{{ name }}">
+            <input type="hidden" name="current_date" value="{{ date }}">
+            <input type="hidden" name="role" value="{{ role }}">
+            <input type="submit" class="hidden_button" value="{{ name }}"/>
+          </form>
+        </td></tr>
+    {% endif %}
+
+  {%- endmacro %}
+
+    <table class="container">
+      <tr><td>
+        <table class="row_header">
+          <tr>
+            <td class="trip_header">
+            </td>
+          </tr>
+          {% for row in range(0, 57, 8) %}
+            {% if row % 8 == 0 %}
+              <tr>
+                <td class="trip_header">
+                  {{ view_staff_headers[row / 8] }}
+                </td>
+              </tr>
+            {% endif %}
+            {% for index in range(1,8) %}
+              <tr>
+                <td>
+                  {{ role_switch_header[index - 1] }}
+                </td>
+              </tr>
+              {% endfor %}
+          {% endfor %}
+        </table>
+    </td>
+
+    {% set row_counter = [0] %}
+
+    {% for date_dict in schedule_list %}
+      <td>
+      <table style="display: inline-block">
+        <tr>
+          <td>{{column_label[loop.index]}}</td>
+        </tr>
+        {% for label in row_label %}
+          {%  if row_counter[0] % 8 == 0 %}
+            <tr>
+              <td class="trip_header"></td>
+            </tr>
+            {% if row_counter.append(row_counter.pop() + 1) %}{% endif %}
+            {% if date_dict[label] is not none %}
+              {{ guide_color(date_dict[label], date_dict['date'], label)}}
+            {% else %}
+              {{ guide_color("", date_dict['date'], label)}}
+            {% endif %}
+            {% if row_counter.append(row_counter.pop() + 1) %}{% endif %}
+          {% else %}
+            {% if row_counter[0] % 8 in [2,3,4] %}
+              {{ guide_color(date_dict[label], date_dict['date'], label)}}
+            {% endif %}
+            {% if row_counter[0] % 8 == 5 %}
+              {{ safety_color(date_dict[label], date_dict['date'], label)}}
+            {% endif %}
+            {% if row_counter[0] % 8 in [6, 7] %}
+              {{ driver_color(date_dict[label], date_dict['date'], label)}}
+            {% endif %}
+            {% if row_counter.append(row_counter.pop() + 1) %}{% endif %}
+          {% endif %}
+          {% endfor %}
+        </table>
+      </td>
+      {% endfor %}
+    </tr>
+  </table>
+
+</body>
+</html>

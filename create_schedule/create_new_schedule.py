@@ -281,6 +281,7 @@ def add_new_date(current_date):
                                         fifth_guide_scenic_float_09 = '',
                                         safety_scenic_float_09 = '',
                                         first_driver_scenic_float_09 = '',
+                                        second_driver_scenic_float_09 = '',
                                         num_clients_scenic_float_13 = 0,
                                         num_guides_scenic_float_13 = 0,
                                         num_safety_scenic_float_13 = 0,

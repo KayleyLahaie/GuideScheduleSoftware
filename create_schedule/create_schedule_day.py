@@ -62,7 +62,7 @@ def create_schedule_day(gui_window, scraper_object, current_date):
 
     if day_of_week == 0:
         print("MAKING SCHEDULE FOR MONDAY")
-        manage_staff.staff_util.reset_this_period()
+        manage_staff.staff_util.reset_this_period(session_guide, session_driver)
 
     current_date_object = create_new_schedule.add_new_date(current_date)
     temp_guide = 0

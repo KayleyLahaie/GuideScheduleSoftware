@@ -1,0 +1,262 @@
+def guide_color(self, arg, html_string, current_date, role):
+    print("guide called")
+    if arg is not None:
+        html_string = html_string + '<tr><td class="guide"><a href="localhost:8080/?date='+current_date+'&role='+role+'">'+arg+'</a></td></tr>'
+    else:
+        html_string = html_string + '<tr><td></td></tr>'
+
+    return html_string
+
+def safety_color(self, arg, html_string, current_date, role):
+    print("safety called")
+    if arg is not None:
+        html_string = html_string + '<tr><td class="safety"><a href="localhost:8080/?date='+current_date+'&role='+role+'">'+arg+'</a></td></tr>'
+    else:
+        html_string = html_string + '<tr><td></td></tr>'
+
+    return html_string
+
+def driver_color(self, arg, html_string, current_date, role):
+    print("driver called")
+    if arg is not None:
+        html_string = html_string + '<tr><td class="driver"><a href="localhost:8080/?date='+current_date+'&role='+role+'">'+arg+'</a></td></tr>'
+    else:
+        html_string = html_string + '<tr><td></td></tr>'
+
+    return html_string
+
+
+def load_schedule_data(self, start_date, end_date):
+    """Queries the schedule table in trips.db for rows that fall in between the
+    start and end dates and loads the gathered data into a table in the
+    View Staff widget
+
+    Parameters
+    ----------
+        start_date: str
+            A string representation of the first date to be queried,
+            formatted as YYYY-MM-DD
+        end_date: str
+            A string representation of the last date to be queried,
+            formatted as YYYY-MM-DD
+    """
+
+    end_date = create_schedule.schedule_util.calculate_next_date(end_date)
+    print(start_date, end_date)
+
+    html_string = """<html><head><style>*{
+    font-family: Malgun Gothic;
+    background-color: rgba(255,255,255,200);
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+
+    table table:not(.row_header){
+      border-left: 1px solid black;
+    }
+
+    td{
+      text-align: center;
+      height: 30px;
+      width:125px;
+      border-bottom: 1px solid black;
+
+    }
+
+    .col_header{
+      display: inline-block;
+      margin-left: 50px;
+    }
+
+    .col_header td{
+      font-size: 10px;
+    }
+
+    .guide{
+
+      color: blue;
+
+    }
+
+    .safety{
+
+      color: red;
+
+    }
+
+    .driver{
+
+      color: green;
+
+    }
+
+    .row_header{
+      width: 250px;
+    }
+
+    .row_header td{
+      text-align: left;
+    }
+
+    .trip_header{
+      background-color: #f5f5f5;
+    }
+
+    .container{
+      padding: 5px;
+      margin-left: 20px;
+      border: 1px solid black;
+    }
+    </style>
+    </head><table class="col_header"><tr><td class="row_header"></td><td>"""
+
+    row_label = [
+        'trip_leader_ready_set_go_10' ,
+        'second_guide_ready_set_go_10' ,
+        'third_guide_ready_set_go_10' ,
+        'fourth_guide_ready_set_go_10' ,
+        'safety_ready_set_go_10' ,
+        'first_driver_ready_set_go_10' ,
+        'second_driver_ready_set_go_10' ,
+        'trip_leader_ready_set_go_14' ,
+        'second_guide_ready_set_go_14' ,
+        'third_guide_ready_set_go_14' ,
+        'fourth_guide_ready_set_go_14' ,
+        'safety_ready_set_go_14',
+        'first_driver_ready_set_go_14',
+        'second_driver_ready_set_go_14',
+        'trip_leader_c_wave_10',
+        'second_guide_c_wave_10',
+        'third_guide_c_wave_10',
+        'fourth_guide_c_wave_10',
+        'safety_c_wave_10',
+        'first_driver_c_wave_10',
+        'second_driver_c_wave_10',
+        'trip_leader_c_wave_14',
+        'second_guide_c_wave_14',
+        'third_guide_c_wave_14',
+        'fourth_guide_c_wave_14',
+        'safety_c_wave_14',
+        'first_driver_c_wave_14',
+        'second_driver_c_wave_14',
+        'trip_leader_guaranteed_addiction_930',
+        'second_guide_guaranteed_addiction_930',
+        'third_guide_guaranteed_addiction_930',
+        'fourth_guide_guaranteed_addiction_930',
+        'safety_guaranteed_addiction_930',
+        'first_driver_guaranteed_addiction_930',
+        'second_driver_guaranteed_addiction_930',
+        'trip_leader_scenic_float_09',
+        'second_guide_scenic_float_09',
+        'third_guide_scenic_float_09',
+        'fourth_guide_scenic_float_09',
+        'safety_scenic_float_09',
+        'first_driver_scenic_float_09',
+        'second_driver_scenic_float_09',
+        'trip_leader_scenic_float_13',
+        'second_guide_scenic_float_13',
+        'third_guide_scenic_float_13',
+        'fourth_guide_scenic_float_13',
+        'safety_scenic_float_13',
+        'first_driver_scenic_float_13',
+        'second_driver_scenic_float_13',
+        'trip_leader_overnight_930',
+        'second_guide_overnight_930',
+        'third_guide_overnight_930',
+        'fourth_guide_overnight_930',
+        'safety_overnight_930',
+        'first_driver_overnight_930',
+        'second_driver_overnight_930',
+    ]
+
+    column_label = [0, 0, 0, 0, 0, 0, 0]
+
+    day_of_week = int(datetime.datetime.strptime(
+        start_date, '%Y-%m-%d').strftime('%w'))
+
+    column_number = day_of_week
+
+    column_label.insert(column_number, start_date)
+    del column_label[column_number + 1]
+
+    current_date = start_date
+    for day in range(day_of_week + 1, 7):
+        column_label.insert(
+            day, create_schedule.schedule_util.calculate_next_date(current_date))
+        del column_label[day + 1]
+        current_date = create_schedule.schedule_util.calculate_next_date(
+            current_date)
+
+    current_date = start_date
+    for day in range(0, day_of_week):
+        column_label.insert(
+            day, create_schedule.schedule_util.calculate_previous_date(current_date))
+        del column_label[day + 1]
+        current_date = create_schedule.schedule_util.calculate_previous_date(
+            current_date)
+
+    for column in range(0, 7):
+        html_string= html_string + column_label[column] + '</td><td>'
+    html_string+='</tr></table>'
+
+    html_string += '<table class="container"><td><table class="row_header">'
+    for row in range(0, 57, 8):
+        if row % 8 ==0:
+            html_string = html_string + '<tr><td class="trip_header">'+create_schedule.schedule_dictionaries.view_staff_headers[row / 8]+'</td></tr>'
+        for index in range(1, 8):
+            html_string = html_string + '<tr><td>'+create_schedule.schedule_dictionaries.role_switch_header[index - 1]+'</td></tr>'
+        row += 1
+    html_string+='</table></td>'
+
+
+    col = 0
+
+    while start_date != end_date:
+
+        html_string += '<td>'
+
+        schedule_object = session_schedule.query(create_schedule.create_new_schedule.schedule).filter(create_schedule.create_new_schedule.schedule.date==start_date)
+        schedule_list = [u.__dict__ for u in schedule_object.all()]
+        print("\n\n", schedule_list)
+
+        day_of_week = int(datetime.datetime.strptime(
+            start_date, '%Y-%m-%d').strftime('%w'))
+
+        row_counter = 0
+        dispatch = {
+            2:self.guide_color,
+            3:self.guide_color,
+            4:self.guide_color,
+            5:self.safety_color,
+            6:self.driver_color,
+            7:self.driver_color
+        }
+
+        for x, dict in enumerate(schedule_list):
+            html_string += '<table style="display: inline-block">'
+            for index, y in enumerate(row_label):
+                if row_counter % 8 == 0:
+                    html_string = html_string + '<tr><td class="trip_header"></td></tr>'
+                    row_counter+=1
+                    if dict[row_label[index]] is not None:
+                        html_string = html_string + '<tr><td class="guide">'+dict[row_label[index]]+'</td></tr>'
+                    else:
+                        html_string = html_string + '<tr><td class="guide"></td></tr>'
+                    row_counter+=1
+                else:
+                    print(row_counter % 8)
+                    html_string = dispatch[row_counter % 8](dict[row_label[index]], html_string, start_date, row_label[index])
+                    row_counter+=1
+
+            html_string += '</table>'
+
+        html_string += '</td>'
+        col+=1
+        start_date = create_schedule.schedule_util.calculate_next_date(start_date)
+
+    html_string += '</table></html>'
+    file = open('templates/schedule.html', mode='w')
+    file.write(html_string)
+    file.close()

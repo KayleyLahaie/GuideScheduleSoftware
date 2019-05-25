@@ -7,13 +7,22 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2 import QtCore, QtGui, QtWidgets, QtWebEngineWidgets
 import datetime
 import sqlite3
 import excel_scraper
 import create_schedule
 import manage_staff
+import flask_util
+import load_schedule_data
 
+from flask import Flask
+from flask import request
+from flask import render_template
+
+import os
+
+import threading
 
 from create_schedule import create_new_schedule
 
@@ -22,7 +31,9 @@ import time
 
 session_guide = manage_staff.guide.guide_session()
 session_driver = manage_staff.driver.driver_session()
+session_schedule = create_new_schedule.schedule_session()
 
+t = threading.Thread(target=flask_util.app.run, daemon=True)
 
 class hover_button(QtWidgets.QPushButton):
     """
@@ -69,6 +80,44 @@ class hover_button(QtWidgets.QPushButton):
                            "  background-color: rgba(255, 255, 255, 200);\n"
                            "  color: #ee7838;")
 
+class drag_and_drop_label(QtWidgets.QLabel):
+
+    def __init__(self, title, parent):
+        super(drag_and_drop_label, self).__init__(parent)
+
+        self.setAcceptDrops(True)
+
+      # The following three methods set up dragging and dropping for the app
+    def dragEnterEvent(self, e):
+        if e.mimeData().hasUrls:
+            e.accept()
+        else:
+            print("nope")
+            e.ignore()
+
+    def dragMoveEvent(self, e):
+        if e.mimeData().hasUrls:
+            e.accept()
+        else:
+            print("nope")
+            e.ignore()
+
+    def dropEvent(self, e):
+
+        if e.mimeData().hasUrls:
+            e.setDropAction(QtCore.Qt.CopyAction)
+            e.accept()
+            # Workaround for OSx dragging and dropping
+            for url in e.mimeData().urls():
+                fname = str(url.toLocalFile())
+
+            self.setText(fname)
+            self.setStyleSheet("font-size:12pt; border: 2px dashed grey; color: #ee7838;")
+            self.fname = fname
+            print(fname)
+
+        else:
+            e.ignore()
 
 class Ui_Form(object):
     """
@@ -148,7 +197,7 @@ class Ui_Form(object):
         self.stackedWidget.setObjectName("stackedWidget")
         self.stackedWidget.setStyleSheet("background-color:#FFFFFF")
         self.stackedWidget.setAutoFillBackground(True)
-
+        self.stackedWidget.setAcceptDrops(True)
 
         self.main_menu = QtWidgets.QWidget()
         self.main_menu.setObjectName("main_menu")
@@ -1001,15 +1050,12 @@ class Ui_Form(object):
         self.background.setPixmap(QtGui.QPixmap('resources/background.jpg'))
         self.background.setGeometry(QtCore.QRect(0, 0, 1200, 795))
 
-        self.tableWidget_2 = QtWidgets.QTableWidget(self.view_schedule)
-        self.tableWidget_2.setGeometry(QtCore.QRect(20, 50, 884, 700))
-        self.tableWidget_2.setRowCount(56)
-        self.tableWidget_2.setColumnCount(7)
-        self.tableWidget_2.setObjectName("tableWidget_2")
-        self.tableWidget_2.setStyleSheet("Background-color: rgba(255,255,255,200);\n"
+        self.web_view = QtWebEngineWidgets.QWebEngineView(self.view_schedule)
+        self.web_view.setGeometry(QtCore.QRect(20, 50, 884, 700))
+        self.web_view.setObjectName("web_view ")
+        self.web_view.setStyleSheet("Background-color: rgba(255,255,255,200);\n"
                                          "  border-radius: 5%;\n")
-        self.tableWidget_2.setVerticalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAlwaysOn)
+
 
         self.back_4 = QtWidgets.QPushButton(self.view_schedule)
         self.back_4.setGeometry(QtCore.QRect(1015, 50, 93, 28))
@@ -1058,6 +1104,7 @@ class Ui_Form(object):
         self.create_new_schedule.setStyleSheet("color: #ee7838;\n"
                                                "background-color:#FFFFFF")
         self.create_new_schedule.setObjectName("create_new_schedule")
+        self.create_new_schedule.setAcceptDrops(True)
 
         self.background = QtWidgets.QLabel(self.create_new_schedule)
         self.background.setPixmap(QtGui.QPixmap('resources/background.jpg'))
@@ -1066,36 +1113,37 @@ class Ui_Form(object):
         self.container = QtWidgets.QLabel(self.create_new_schedule)
         self.container.setStyleSheet("Background-color: rgba(255,255,255,200);\n"
                                      "  border-radius: 5%;\n")
-        self.container.setGeometry(QtCore.QRect(235, 262.5, 700, 250))
+        self.container.setGeometry(QtCore.QRect(235, 212.5, 700, 350))
 
-        self.drag_and_drop = QtWidgets.QLabel(self.create_new_schedule)
-        self.drag_and_drop.setStyleSheet("border: 2px dashed grey;")
-        self.container.setGeometry(QtCore.QRect(250, 275, 600, 225))
+        self.drag_and_drop = drag_and_drop_label("drag_drop",self.create_new_schedule)
+        self.drag_and_drop.setStyleSheet("border: 2px dashed grey; color: #ee7838;")
+        self.drag_and_drop.setGeometry(QtCore.QRect(262.5, 240, 645, 175))
 
-        self.file_path = QtWidgets.QTextEdit(self.create_new_schedule)
-        self.file_path.setGeometry(QtCore.QRect(450, 350, 250, 31))
-        self.file_path.setStyleSheet("background-color: #FFFFFF")
-        self.file_path.setObjectName("file_path")
-        self.label = QtWidgets.QLabel(self.create_new_schedule)
-        self.label.setGeometry(QtCore.QRect(350, 350, 91, 31))
-        self.label.setObjectName("label")
-        self.label.setStyleSheet("background-color: rgba(255,255,255,0)")
-        self.choose_file = QtWidgets.QPushButton(self.create_new_schedule)
-        self.choose_file.setGeometry(QtCore.QRect(710, 350, 93, 28))
+        self.choose_file = hover_button(self.create_new_schedule)
+        self.choose_file.setGeometry(QtCore.QRect(470, 450, 250, 35))
         self.choose_file.setStyleSheet("  border: none;\n"
                                     "  padding: 0.5%;\n"
                                     "  cursor: pointer;\n"
                                     "  font-family: special_font;\n"
-                                    "  font-size: 130%;\n"
+                                    "  font-size: 12pt;\n"
                                     "  border-radius: 3%;\n"
                                     "  opacity: 0.9;\n"
-                                    "  background-color: #006898;\n"
+                                    "  background-color: rgba(255, 255, 255, 200);\n"
                                     "  color: #ee7838;")
         self.choose_file.setObjectName("choose_file")
         self.choose_file.clicked.connect(self.choose_new_file)
-        self.choose_file.show()
+
+        self.horizontal_layout = QtWidgets.QHBoxLayout()
+        self.horizontal_layout.addWidget(self.drag_and_drop)
+        self.horizontal_layout.addStretch()
+
+        self.vertical_layout = QtWidgets.QVBoxLayout()
+        self.vertical_layout.addLayout(self.horizontal_layout)
+        self.vertical_layout.addWidget(self.choose_file)
+
+
         self.submit_3 = QtWidgets.QPushButton(self.create_new_schedule)
-        self.submit_3.setGeometry(QtCore.QRect(710, 410, 93, 28))
+        self.submit_3.setGeometry(QtCore.QRect(814.5, 500, 93, 28))
         self.submit_3.setStyleSheet("  border: none;\n"
                                     "  padding: 0.5%;\n"
                                     "  cursor: pointer;\n"
@@ -1103,7 +1151,7 @@ class Ui_Form(object):
                                     "  font-size: 130%;\n"
                                     "  border-radius: 3%;\n"
                                     "  opacity: 0.9;\n"
-                                    "  background-color: #006898;\n"
+                                    "  background-color: rgba(0,104,152,200);\n"
                                     "  color: #ee7838;")
         self.submit_3.setObjectName("submit_3")
         self.submit_3.clicked.connect(self.scrape_excel_sheet)
@@ -1301,13 +1349,8 @@ class Ui_Form(object):
             QtWidgets.QApplication.translate("Form", "Back", None, 0))
         self.submit_date_range.setText(
             QtWidgets.QApplication.translate("Form", "Submit", None, 0))
-        self.file_path.setHtml(QtWidgets.QApplication.translate("Form", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                                                "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                                                "p, li { white-space: pre-wrap; }\n"
-                                                                "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.5pt; font-weight:400; font-style:normal;\">\n"
-                                                                "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;\"><br /></p></body></html>", None, 0))
-        self.label.setText(QtWidgets.QApplication.translate(
-            "Form", "<html><head/><body><p><span style=\" font-size:12pt;\">File Path</span></p></body></html>", None, 0))
+        self.drag_and_drop.setText(QtWidgets.QApplication.translate(
+            "Form", "<html><body><p style=\" font-size:12pt; text-align:center\">Drop File Here</span></p></body></html>", None, 0))
         self.choose_file.setText(
             QtWidgets.QApplication.translate("Form", "Choose File", None, 0))
         self.submit_3.setText(
@@ -1335,20 +1378,14 @@ class Ui_Form(object):
         This method is also responsible for populating the vertical and
         horizontal headers before the data is loaded
         """
+        start_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        day = int(start_date[-2:])+7
+        end_date = start_date[:-2]+str(day)
 
-        row_number = 0
+        t.start()
+        load_schedule_data.load_schedule_data(session_schedule, start_date, end_date)
 
-        for row in range(0, 56, 8):
-
-            self.tableWidget_2.setVerticalHeaderItem(row, QtWidgets.QTableWidgetItem(
-                create_schedule.schedule_dictionaries.view_staff_headers[row / 8]))
-
-            for index in range(1, 8):
-                item = QtWidgets.QTableWidgetItem(
-                    create_schedule.schedule_dictionaries.role_switch[index - 1])
-                self.tableWidget_2.setVerticalHeaderItem(index + row, item)
-
-            row += 1
+        self.web_view.setUrl("http://127.0.0.1:5000/schedule.html")
 
         self.stackedWidget.setCurrentIndex(4)
 
@@ -1567,7 +1604,11 @@ class Ui_Form(object):
         start = self.start_date.textFromDateTime(temp_date)
         temp_date = self.end_date.dateTime()
         end = self.end_date.textFromDateTime(temp_date)
-        self.load_schedule_data(start, end)
+
+        load_schedule_data.load_schedule_data(session_schedule, start, end)
+
+        self.web_view.setUrl("http://127.0.0.1:5000/schedule.html")
+
 
     def load_staff_data(self):
         """Queries the driver and guide tables in staff.db and loads the gathered
@@ -1681,98 +1722,13 @@ class Ui_Form(object):
                     self.tableWidget_5.setItem(row, index, QtWidgets.QTableWidgetItem(
                         str(driver_list[row][driver_header[index]])))
 
-    def load_schedule_data(self, start_date, end_date):
-        """Queries the schedule table in trips.db for rows that fall in between the
-        start and end dates and loads the gathered data into a table in the
-        View Staff widget
-
-        Parameters
-        ----------
-            start_date: str
-                A string representation of the first date to be queried,
-                formatted as YYYY-MM-DD
-            end_date: str
-                A string representation of the last date to be queried,
-                formatted as YYYY-MM-DD
-        """
-        connection_trips = sqlite3.connect('trips.db')
-        c_trips = connection_trips.cursor()
-
-        print(start_date, end_date)
-
-        date = start_date
-        day_of_week = int(datetime.datetime.strptime(
-            date, '%Y-%m-%d').strftime('%w'))
-        end_date = create_schedule.schedule_util.calculate_next_date(end_date)
-
-        row_label = []
-
-        column_label = [0, 0, 0, 0, 0, 0, 0]
-
-        column_number = day_of_week
-
-        column_label.insert(column_number, date)
-        del column_label[column_number + 1]
-
-        current_date = date
-        for day in range(day_of_week + 1, 7):
-            column_label.insert(
-                day, create_schedule.schedule_util.calculate_next_date(current_date))
-            del column_label[day + 1]
-            current_date = create_schedule.schedule_util.calculate_next_date(
-                current_date)
-
-        current_date = date
-        for day in range(0, day_of_week):
-            column_label.insert(
-                day, create_schedule.schedule_util.calculate_previous_date(current_date))
-            del column_label[day + 1]
-            current_date = create_schedule.schedule_util.calculate_previous_date(
-                current_date)
-
-        for row in range(0, 56, 8):
-
-            self.tableWidget_2.setVerticalHeaderItem(row, QtWidgets.QTableWidgetItem(
-                create_schedule.schedule_dictionaries.view_staff_headers[row / 8]))
-
-            for index in range(1, 8):
-
-                self.tableWidget_2.setVerticalHeaderItem(index + row, QtWidgets.QTableWidgetItem(
-                    create_schedule.schedule_dictionaries.role_switch[index - 1]))
-
-            row += 1
-
-        for column in range(0, 7):
-            self.tableWidget_2.setHorizontalHeaderItem(
-                column, QtWidgets.QTableWidgetItem(column_label[column]))
-
-        while date != end_date:
-
-            for row in range(0, 56, 8):
-
-                self.tableWidget_2.setItem(
-                    row, column_number, QtWidgets.QTableWidgetItem(""))
-                for trip_num in range(1, 8):
-                    c_trips.execute("SELECT " + create_schedule.schedule_dictionaries.role_switch[trip_num - 1] +
-                                    create_schedule.schedule_dictionaries.trip_switch_numerical[row / 8] + " FROM schedule WHERE date =  ?", (date,))
-                    result = c_trips.fetchone()
-
-                    if result[0] is not None:
-                        self.tableWidget_2.setItem(
-                            row + trip_num, column_number, QtWidgets.QTableWidgetItem(str(result[0])))
-
-            column_number += 1
-
-            date = create_schedule.schedule_util.calculate_next_date(date)
-        c_trips.close()
-
     def scrape_excel_sheet(self):
         """Creates a scraper object and uses it to extract data from a file path
         submitted by the user and passes the object and its data to the methods
         necesary to process the data
         """
 
-        path = self.file_path.toPlainText()
+        path = self.drag_and_drop.fname
 
         excel_data = excel_scraper.scraper.excel_scraper(path)
         date = excel_data.get_first_date()
@@ -1795,11 +1751,11 @@ class Ui_Form(object):
                 self, excel_data, date)
             date = create_schedule.schedule_util.calculate_next_date(date)
 
-        self.load_schedule_data(excel_data.get_first_date(
+        load_schedule_data.load_schedule_data(session_schedule, excel_data.get_first_date(
         ), create_schedule.schedule_util.calculate_previous_date(date))
 
         self.on_clicked_view_schedule()
 
     def choose_new_file(self):
-        #file_path = QtWidgets.QFileDialog.getOpenFileName(parent: PySide2.QtWidgets.QWidget = None, caption: str = 'Open File', dir: str = 'C:\\Downloads', filter: str = 'Excel Spreadsheet (*.xlsx)', selectedFilter: str = '')
-        #self.file_path.setText(file_path)
+        print("clicked")
+        #self.file_path_string, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file')
