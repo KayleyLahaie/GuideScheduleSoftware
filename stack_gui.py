@@ -13,8 +13,9 @@ import sqlite3
 import excel_scraper
 import create_schedule
 import manage_staff
-import flask_util
 import load_schedule_data
+import worker
+import popups
 
 from flask import Flask
 from flask import request
@@ -32,8 +33,6 @@ import time
 session_guide = manage_staff.guide.guide_session()
 session_driver = manage_staff.driver.driver_session()
 session_schedule = create_new_schedule.schedule_session()
-
-t = threading.Thread(target=flask_util.app.run, daemon=True)
 
 class hover_button(QtWidgets.QPushButton):
     """
@@ -189,6 +188,9 @@ class Ui_Form(object):
         ------------
             -retranslateUi()
         """
+
+        self.worker = worker.Worker()
+        self.worker.open_dialog_signal.connect(self.open_dialog)
 
         Form.setObjectName("Form")
         Form.resize(1200, 764)
@@ -1379,10 +1381,11 @@ class Ui_Form(object):
         horizontal headers before the data is loaded
         """
         start_date = datetime.datetime.now().strftime("%Y-%m-%d")
-        day = int(start_date[-2:])+7
-        end_date = start_date[:-2]+str(day)
+        end_date = start_date
+        for i in range(0,7):
+            end_date = create_schedule.schedule_util.calculate_next_date(end_date)
 
-        t.start()
+        self.worker.start()
         load_schedule_data.load_schedule_data(session_schedule, start_date, end_date)
 
         self.web_view.setUrl("http://127.0.0.1:5000/schedule.html")
@@ -1759,3 +1762,15 @@ class Ui_Form(object):
     def choose_new_file(self):
         print("clicked")
         #self.file_path_string, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file')
+
+    def open_dialog(self, name, date, role):
+        DialogBox = QtWidgets.QDialog()
+        ui_change = popups.edit_schedule_popup.Ui_edit_schedule_popup()
+        ui_change.setupUi(DialogBox, name,
+                          role, DialogBox)
+        DialogBox.show()
+
+        if DialogBox.exec_():
+            new_staff_list = ui_change.return_new_staff()
+            new_name = new_staff_list[0]
+            trip_role = new_staff_list[1]

@@ -69,6 +69,15 @@ def is_day_off(guide_name, current_date):
         x+=1
     return days_since
 
+def update_staff_in_db(session_schedule, session_guide, session_driver, old_name, new_name, trip_role, date):
+    schedule_object = session_schedule.query(create_schedule.schedule.schedule)
+    schedule_list = [u.__dict__ for u in schedule_object.all()]
+
+    num_trips = num_trips_list[0][create_schedule.schedule_dictionaries.guide_roles[role]
+                                  +create_schedule.schedule_dictionaries.time_types[0]
+                                  +create_schedule.schedule_dictionaries.trip_types[trip_name]]
+
+
 def update_num_trips_guide(session_guide, session_schedule, guide_name,
                             trip_name, priority_change,
                             role, date_to_be_updated):
@@ -401,8 +410,8 @@ def get_guides_can_work(session_guide, trip_type, role_type):
     Returns
     -------
     list
-        a list of dictionaries containing all of the information stored in the
-        database on each guide who is able to perform the role for the trip type
+        a list containing the names stored in the
+        database of each guide who is able to perform the role for the trip type
     """
 
     guides_can_work_object = session_guide.query(manage_staff.guide.guide).filter(
@@ -413,8 +422,44 @@ def get_guides_can_work(session_guide, trip_type, role_type):
     final_guides_list = []
 
     for n, m in enumerate(guides_can_work_list):
-        if guides_can_work_list[n][create_schedule.schedule_dictionaries.guide_roles[role_type]
+        if guides_can_work_list[n][create_schedule.schedule_dictionaries.guide_roles_2[role_type]
                 +create_schedule.schedule_dictionaries.trip_types[trip_type]] == '1':
             final_guides_list.append(guides_can_work_list[n]['name'])
 
     return final_guides_list
+
+
+def get_drivers_can_work(session_driver, trip_type):
+    """Creates a list of all of the guides currently stored in the guides table
+    that can perform the given role for the given trip type
+
+    Parameters
+    ----------
+    session_guide: session
+        A session object that allows access to the guide table in staff.db
+    trip_type: int
+        An integer value representing a type of trip that can be used as a key
+        in the trip_types dictionary
+    role_type: int
+        An integer value representing a type of role that can be used as a key
+        in the guide_roles dictionary
+
+    Returns
+    -------
+    list
+        a list containing the names stored in the
+        database of each driver who is able to work the specified trip
+    """
+
+    drivers_can_work_object = session_driver.query(manage_staff.driver.driver).filter(
+                                manage_staff.driver.driver.in_stream.in_(['true']))
+
+    drivers_can_work_list = [u.__dict__ for u in drivers_can_work_object.all()]
+
+    final_drivers_list = []
+
+    for n, m in enumerate(drivers_can_work_list):
+        if drivers_can_work_list[n][create_schedule.schedule_dictionaries.trip_types[trip_type]] == '1':
+            final_drivers_list.append(drivers_can_work_list[n]['name'])
+
+    return final_drivers_list
